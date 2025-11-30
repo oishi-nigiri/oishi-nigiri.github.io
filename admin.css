@@ -606,6 +606,45 @@ body {
     box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
 }
 
+.form-group small {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--color-text-light);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.menu-display-mode {
+    background: var(--color-light);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border);
+    margin-top: 1rem;
+}
+
+.menu-display-mode .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.menu-display-mode .form-group:last-of-type {
+    margin-bottom: 0;
+}
+
+.menu-display-mode .checkbox-label {
+    margin-bottom: 0.5rem;
+}
+
+.menu-display-mode .form-group small {
+    margin-left: 2rem;
+    margin-top: 0.5rem;
+}
+
+.menu-display-mode .form-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--color-border);
+}
+
 .form-actions {
     display: flex;
     gap: 1rem;

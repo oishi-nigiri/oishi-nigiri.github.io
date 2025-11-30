@@ -108,7 +108,48 @@ async function loadWeeklyMenu() {
             return;
         }
 
-        const menuSnapshot = await db.collection('menuSemaine').get();
+        const isLoading = !container.querySelector('.weekly-menu-category-section') && !container.querySelector('.weekly-menu-image-container');
+        if (isLoading) {
+            container.innerHTML = '<div class="loading-menu"><p>Chargement de la carte...</p></div>';
+        }
+
+        const getWithCache = async (query) => {
+            try {
+                const cacheResult = await query.get({ source: 'cache' });
+                query.get({ source: 'server' }).catch(() => {});
+                return cacheResult;
+            } catch {
+                return await query.get();
+            }
+        };
+
+        const configDoc = await getWithCache(db.collection('menuConfig').doc('display'));
+        
+        if (configDoc.exists) {
+            const config = configDoc.data();
+            if (config.useImageMode && config.imageUrl) {
+                container.innerHTML = `
+                    <div class="weekly-menu-image-container" style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; padding: 2rem;">
+                        <img src="${config.imageUrl}" alt="Carte de la semaine" class="weekly-menu-image" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); transition: transform 0.3s ease;">
+                    </div>
+                `;
+                const img = container.querySelector('.weekly-menu-image');
+                if (img) {
+                    img.addEventListener('mouseenter', () => {
+                        img.style.transform = 'scale(1.02)';
+                    });
+                    img.addEventListener('mouseleave', () => {
+                        img.style.transform = 'scale(1)';
+                    });
+                }
+                return;
+            }
+        }
+
+        const [menuSnapshot, categoriesSnapshot] = await Promise.all([
+            getWithCache(db.collection('menuSemaine')),
+            getWithCache(db.collection('menuCategories').orderBy('order', 'asc'))
+        ]);
 
         if (menuSnapshot.empty) {
             container.innerHTML = '<div class="loading-menu"><p>Aucune carte de la semaine disponible pour le moment.</p></div>';
@@ -131,7 +172,6 @@ async function loadWeeklyMenu() {
             });
         });
 
-        const categoriesSnapshot = await db.collection('menuCategories').orderBy('order', 'asc').get();
         const categoriesMap = {};
         categoriesSnapshot.forEach(doc => {
             const cat = doc.data();
@@ -145,10 +185,10 @@ async function loadWeeklyMenu() {
             return a.localeCompare(b);
         });
 
-        container.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        const itemsToAnimate = [];
 
         sortedCategories.forEach(category => {
-
             const categorySection = document.createElement('div');
             categorySection.className = 'weekly-menu-category-section';
             categorySection.style.gridColumn = '1 / -1';
@@ -168,27 +208,35 @@ async function loadWeeklyMenu() {
             menuByCategory[category].forEach(item => {
                 const itemElement = document.createElement('div');
                 itemElement.className = 'weekly-menu-item';
+                const name = item.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const description = item.description.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 itemElement.innerHTML = `
                     <div class="weekly-menu-item-header">
                         <div class="weekly-menu-item-title">
-                            ${item.name}
+                            ${name}
                         </div>
                         <div class="weekly-menu-item-price">${item.price}€</div>
                     </div>
-                    <div class="weekly-menu-item-description">${item.description}</div>
+                    <div class="weekly-menu-item-description">${description}</div>
                 `;
                 categoryItems.appendChild(itemElement);
+                itemsToAnimate.push(itemElement);
             });
 
             categorySection.appendChild(categoryItems);
-            container.appendChild(categorySection);
+            fragment.appendChild(categorySection);
         });
 
-        container.querySelectorAll('.weekly-menu-item').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
+        container.innerHTML = '';
+        container.appendChild(fragment);
+
+        requestAnimationFrame(() => {
+            itemsToAnimate.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
         });
 
     } catch (error) {
@@ -223,6 +271,11 @@ document.addEventListener('DOMContentLoaded', () => {
             loadWeeklyMenu();
 
             db.collection('menuSemaine')
+                .onSnapshot((snapshot) => {
+                    loadWeeklyMenu();
+                });
+            
+            db.collection('menuConfig').doc('display')
                 .onSnapshot((snapshot) => {
                     loadWeeklyMenu();
                 });

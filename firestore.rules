@@ -50,6 +50,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+    
+    match /menuConfig/{configId} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }
 

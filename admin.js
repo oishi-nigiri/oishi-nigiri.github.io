@@ -69,6 +69,7 @@ async function checkAuth() {
                     localStorage.setItem('discordToken', accessToken);
                     localStorage.setItem('isAdmin', 'true');
                     showAdminPanel(userInfo);
+                    loadMenuConfig();
                     loadCategories();
                     loadMenuItems();
                     loadTeamMembers();
@@ -93,6 +94,7 @@ async function checkAuth() {
             localStorage.setItem('discordToken', discordToken);
             localStorage.setItem('isAdmin', 'true');
             showAdminPanel(user);
+            loadMenuConfig();
             loadCategories();
             loadMenuItems();
             loadTeamMembers();
@@ -335,6 +337,24 @@ function setupEventListeners() {
             closeMemberModal();
         }
     });
+
+
+    const useImageModeCheckbox = document.getElementById('use-image-mode');
+    const imageUrlGroup = document.getElementById('image-url-group');
+    const saveMenuConfigBtn = document.getElementById('save-menu-config-btn');
+    
+    useImageModeCheckbox?.addEventListener('change', (e) => {
+        if (imageUrlGroup) {
+            imageUrlGroup.style.display = e.target.checked ? 'block' : 'none';
+        }
+    });
+    
+    saveMenuConfigBtn?.addEventListener('click', async () => {
+        await saveMenuConfig();
+    });
+    
+
+    loadMenuConfig();
 
 }
 
@@ -2515,6 +2535,80 @@ async function showHistoryDetailsModal(period) {
     });
 }
 
+
+async function loadMenuConfig() {
+    try {
+        const configDoc = await db.collection('menuConfig').doc('display').get();
+        const useImageModeCheckbox = document.getElementById('use-image-mode');
+        const imageUrlInput = document.getElementById('menu-image-url');
+        const imageUrlGroup = document.getElementById('image-url-group');
+        
+        if (configDoc.exists) {
+            const config = configDoc.data();
+            if (useImageModeCheckbox) {
+                useImageModeCheckbox.checked = config.useImageMode || false;
+            }
+            if (imageUrlInput) {
+                imageUrlInput.value = config.imageUrl || '';
+            }
+            if (imageUrlGroup) {
+                imageUrlGroup.style.display = (config.useImageMode || false) ? 'block' : 'none';
+            }
+        } else {
+            if (useImageModeCheckbox) {
+                useImageModeCheckbox.checked = false;
+            }
+            if (imageUrlInput) {
+                imageUrlInput.value = '';
+            }
+            if (imageUrlGroup) {
+                imageUrlGroup.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement de la configuration du menu:', error);
+    }
+}
+
+async function saveMenuConfig() {
+    if (!hasPermission('menu')) {
+        alert('Vous n\'avez pas la permission de modifier la carte.');
+        return;
+    }
+    
+    const useImageModeCheckbox = document.getElementById('use-image-mode');
+    const imageUrlInput = document.getElementById('menu-image-url');
+    
+    if (!useImageModeCheckbox || !imageUrlInput) {
+        return;
+    }
+    
+    const useImageMode = useImageModeCheckbox.checked;
+    const imageUrl = imageUrlInput.value.trim();
+    
+    if (useImageMode && !imageUrl) {
+        alert('Veuillez entrer une URL d\'image lorsque le mode image est activé.');
+        return;
+    }
+    
+    showLoading(true);
+    
+    try {
+        const configData = {
+            useImageMode,
+            imageUrl: useImageMode ? imageUrl : null,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('menuConfig').doc('display').set(configData, { merge: true });
+        alert('Configuration enregistrée avec succès !');
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde de la configuration:', error);
+        alert('Erreur lors de la sauvegarde de la configuration.');
+    } finally {
+        showLoading(false);
+    }
+}
 
 async function loadCategories() {
     if (!categoriesContainer) return;

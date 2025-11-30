@@ -79,6 +79,31 @@
                     
                     <div class="admin-section">
                         <div class="section-header">
+                            <h2>Mode Affichage</h2>
+                        </div>
+                        <div class="menu-display-mode">
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="use-image-mode">
+                                    <span>Utiliser une image au lieu du menu manuel</span>
+                                </label>
+                                <small>Si coché, seule l'image sera affichée sur le site</small>
+                            </div>
+                            <div class="form-group" id="image-url-group" style="display: none;">
+                                <label for="menu-image-url">URL de l'image du menu</label>
+                                <input type="url" id="menu-image-url" placeholder="https://...">
+                                <small>Collez ici le lien de l'image (ex: depuis Discord ou un hébergeur d'images)</small>
+                            </div>
+                            <div class="form-actions">
+                                <button id="save-menu-config-btn" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer la Configuration
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <div class="section-header">
                             <h2>Catégories</h2>
                             <button id="add-category-btn" class="btn btn-secondary">
                                 <i class="fas fa-plus"></i> Ajouter une Catégorie
