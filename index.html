@@ -25,7 +25,7 @@
                 <li><a href="#carte-semaine">Menu</a></li>
                 <li><a href="#apropos">À Propos</a></li>
                 <li><a href="#equipe">Équipe</a></li>
-                <li><a href="#" id="recrutement-btn" class="recrutement-link">Recrutement</a></li>
+                <li><a href="recrutement.html" target="_blank">Recrutement</a></li>
             </ul>
             <div id="auth-container" class="auth-container"></div>
             <div class="hamburger">
@@ -122,61 +122,6 @@
             </div>
         </div>
     </section>
-
-    <div id="recruitment-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <span class="title-decor">━</span>
-                    Recrutement
-                    <span class="title-decor">━</span>
-                </h2>
-                <button class="modal-close" id="modal-close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="recruitment-intro">
-                    Vous souhaitez rejoindre notre équipe ? Remplissez le formulaire ci-dessous et nous vous recontacterons rapidement.
-                </p>
-                <form id="recruitment-form" class="recruitment-form">
-                    <div class="form-group">
-                        <label for="nom-prenom">Nom & Prénom *</label>
-                        <input type="text" id="nom-prenom" name="nom-prenom" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email-discord">Email / Pseudo Discord *</label>
-                        <input type="text" id="email-discord" name="email-discord" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="motivations">Motivations *</label>
-                        <textarea id="motivations" name="motivations" rows="5" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="experiences">Expériences</label>
-                        <textarea id="experiences" name="experiences" rows="5"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Avez-vous l'esprit d'équipe ? *</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="esprit-equipe" value="oui" required>
-                                <span>Oui</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="esprit-equipe" value="non" required>
-                                <span>Non</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="mot-fin">Le mot de la fin</label>
-                        <textarea id="mot-fin" name="mot-fin" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="submit-button">Envoyer ma candidature</button>
-                    <div id="form-message" class="form-message"></div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     <footer class="footer">
         <div class="container">

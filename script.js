@@ -450,64 +450,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 5000);
 
-    const recruitmentBtn = document.getElementById('recrutement-btn');
-    const recruitmentModal = document.getElementById('recruitment-modal');
-    const modalCloseBtn = document.getElementById('modal-close-btn');
-    
-    if (recruitmentBtn && recruitmentModal) {
-        recruitmentBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            openRecruitmentModal();
-        });
-    }
-    
-    if (modalCloseBtn) {
-        modalCloseBtn.addEventListener('click', closeRecruitmentModal);
-    }
-    
-    if (recruitmentModal) {
-        recruitmentModal.addEventListener('click', (e) => {
-            if (e.target === recruitmentModal) {
-                closeRecruitmentModal();
-            }
-        });
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && recruitmentModal.classList.contains('active')) {
-                closeRecruitmentModal();
-            }
-        });
-    }
-    
     const recruitmentForm = document.getElementById('recruitment-form');
     if (recruitmentForm) {
         recruitmentForm.addEventListener('submit', handleRecruitmentSubmit);
     }
 });
-
-function openRecruitmentModal() {
-    const modal = document.getElementById('recruitment-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        requestAnimationFrame(() => {
-            modal.classList.add('active');
-        });
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-function closeRecruitmentModal() {
-    const modal = document.getElementById('recruitment-modal');
-    if (modal) {
-        modal.classList.remove('active');
-        setTimeout(() => {
-            if (!modal.classList.contains('active')) {
-                modal.style.display = 'none';
-            }
-        }, 200);
-        document.body.style.overflow = '';
-    }
-}
 
 function truncateText(text, maxLength = 1024) {
     if (!text || text.length <= maxLength) {
@@ -610,10 +557,9 @@ async function handleRecruitmentSubmit(e) {
             form.reset();
             
             setTimeout(() => {
-                closeRecruitmentModal();
                 submitButton.disabled = false;
                 submitButton.textContent = 'Envoyer ma candidature';
-            }, 2000);
+            }, 3000);
         } else {
             throw new Error('Erreur lors de l\'envoi');
         }
