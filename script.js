@@ -128,20 +128,32 @@ async function loadWeeklyMenu() {
         if (configDoc.exists) {
             const config = configDoc.data();
             if (config.useImageMode && config.imageUrl) {
-                container.innerHTML = `
-                    <div class="weekly-menu-image-container" style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; padding: 2rem;">
-                        <img src="${config.imageUrl}" alt="Carte de la semaine" class="weekly-menu-image" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); transition: transform 0.3s ease;">
-                    </div>
-                `;
-                const img = container.querySelector('.weekly-menu-image');
-                if (img) {
-                    img.addEventListener('mouseenter', () => {
-                        img.style.transform = 'scale(1.02)';
-                    });
-                    img.addEventListener('mouseleave', () => {
-                        img.style.transform = 'scale(1)';
-                    });
+                const safeImageUrl = sanitizeUrl(config.imageUrl);
+                if (!safeImageUrl) {
+                    container.innerHTML = '<div class="loading-menu"><p>URL d\'image invalide.</p></div>';
+                    return;
                 }
+                
+                container.innerHTML = '';
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'weekly-menu-image-container';
+                imageContainer.style.cssText = 'grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; padding: 2rem;';
+                
+                const img = document.createElement('img');
+                img.src = safeImageUrl;
+                img.alt = 'Carte de la semaine';
+                img.className = 'weekly-menu-image';
+                img.style.cssText = 'max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); transition: transform 0.3s ease;';
+                
+                img.addEventListener('mouseenter', () => {
+                    img.style.transform = 'scale(1.02)';
+                });
+                img.addEventListener('mouseleave', () => {
+                    img.style.transform = 'scale(1)';
+                });
+                
+                imageContainer.appendChild(img);
+                container.appendChild(imageContainer);
                 return;
             }
         }
@@ -208,17 +220,31 @@ async function loadWeeklyMenu() {
             menuByCategory[category].forEach(item => {
                 const itemElement = document.createElement('div');
                 itemElement.className = 'weekly-menu-item';
-                const name = item.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                const description = item.description.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                itemElement.innerHTML = `
-                    <div class="weekly-menu-item-header">
-                        <div class="weekly-menu-item-title">
-                            ${name}
-                        </div>
-                        <div class="weekly-menu-item-price">${item.price}€</div>
-                    </div>
-                    <div class="weekly-menu-item-description">${description}</div>
-                `;
+                
+                const safeName = escapeHtml(String(item.name || ''));
+                const safeDescription = escapeHtml(String(item.description || ''));
+                const safePrice = escapeHtml(String(item.price || '0'));
+                
+                const header = document.createElement('div');
+                header.className = 'weekly-menu-item-header';
+                
+                const title = document.createElement('div');
+                title.className = 'weekly-menu-item-title';
+                title.textContent = safeName;
+                header.appendChild(title);
+                
+                const price = document.createElement('div');
+                price.className = 'weekly-menu-item-price';
+                price.textContent = safePrice + '€';
+                header.appendChild(price);
+                
+                itemElement.appendChild(header);
+                
+                const description = document.createElement('div');
+                description.className = 'weekly-menu-item-description';
+                description.textContent = safeDescription;
+                itemElement.appendChild(description);
+                
                 categoryItems.appendChild(itemElement);
                 itemsToAnimate.push(itemElement);
             });
@@ -254,12 +280,43 @@ async function loadWeeklyMenu() {
             errorMessage = 'Un index Firestore est requis pour cette requête.';
             helpMessage = 'Consultez CREATION_INDEX_FIRESTORE.md pour créer l\'index.';
             const indexUrl = error.message.match(/https:\/\/[^\s]+/)?.[0];
-            if (indexUrl) {
-                helpMessage += ` <a href="${indexUrl}" target="_blank" style="color: #667eea; text-decoration: underline;">Cliquez ici pour créer l'index</a>`;
+            if (indexUrl && sanitizeUrl(indexUrl)) {
+                const safeIndexUrl = sanitizeUrl(indexUrl);
+                helpMessage += ` <a href="${escapeHtml(safeIndexUrl)}" target="_blank" style="color: #667eea; text-decoration: underline;">Cliquez ici pour créer l'index</a>`;
             }
         }
 
-        container.innerHTML = `<div class="loading-menu"><p>${errorMessage}</p>${helpMessage ? `<p style="font-size: 0.9em; margin-top: 0.5em; opacity: 0.8;">${helpMessage}</p>` : ''}</div>`;
+        container.innerHTML = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'loading-menu';
+        
+        const errorP = document.createElement('p');
+        errorP.textContent = errorMessage;
+        errorDiv.appendChild(errorP);
+        
+        if (helpMessage) {
+            const helpP = document.createElement('p');
+            helpP.style.cssText = 'font-size: 0.9em; margin-top: 0.5em; opacity: 0.8;';
+            const linkMatch = helpMessage.match(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/);
+            if (linkMatch) {
+                const beforeLink = helpMessage.substring(0, helpMessage.indexOf('<a'));
+                const linkText = linkMatch[2];
+                const linkUrl = linkMatch[1];
+                
+                helpP.appendChild(document.createTextNode(beforeLink + ' '));
+                const link = document.createElement('a');
+                link.href = escapeHtml(linkUrl);
+                link.target = '_blank';
+                link.style.cssText = 'color: #667eea; text-decoration: underline;';
+                link.textContent = linkText;
+                helpP.appendChild(link);
+            } else {
+                helpP.textContent = helpMessage;
+            }
+            errorDiv.appendChild(helpP);
+        }
+        
+        container.appendChild(errorDiv);
     }
 }
 
@@ -323,16 +380,50 @@ async function loadOrganigramme() {
         members.forEach(member => {
             const memberCard = document.createElement('div');
             memberCard.className = 'team-member-card';
-            memberCard.innerHTML = `
-                <div class="team-member-photo">
-                    ${member.photo ? `<img src="${member.photo}" alt="${member.name}">` : '<div class="team-member-placeholder">👤</div>'}
-                </div>
-                <div class="team-member-info">
-                    <h3 class="team-member-name">${member.name}</h3>
-                    <p class="team-member-role">${member.role}</p>
-                    ${member.description ? `<p class="team-member-description">${member.description}</p>` : ''}
-                </div>
-            `;
+            
+            const safeName = escapeHtml(String(member.name || ''));
+            const safeRole = escapeHtml(String(member.role || ''));
+            const safeDescription = member.description ? escapeHtml(String(member.description)) : null;
+            const safePhoto = member.photo ? sanitizeUrl(member.photo) : null;
+            
+            const photoDiv = document.createElement('div');
+            photoDiv.className = 'team-member-photo';
+            
+            if (safePhoto) {
+                const img = document.createElement('img');
+                img.src = safePhoto;
+                img.alt = safeName;
+                photoDiv.appendChild(img);
+            } else {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'team-member-placeholder';
+                placeholder.textContent = '👤';
+                photoDiv.appendChild(placeholder);
+            }
+            
+            memberCard.appendChild(photoDiv);
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'team-member-info';
+            
+            const nameH3 = document.createElement('h3');
+            nameH3.className = 'team-member-name';
+            nameH3.textContent = safeName;
+            infoDiv.appendChild(nameH3);
+            
+            const roleP = document.createElement('p');
+            roleP.className = 'team-member-role';
+            roleP.textContent = safeRole;
+            infoDiv.appendChild(roleP);
+            
+            if (safeDescription) {
+                const descP = document.createElement('p');
+                descP.className = 'team-member-description';
+                descP.textContent = safeDescription;
+                infoDiv.appendChild(descP);
+            }
+            
+            memberCard.appendChild(infoDiv);
             container.appendChild(memberCard);
         });
 

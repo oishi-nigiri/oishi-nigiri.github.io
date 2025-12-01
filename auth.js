@@ -60,10 +60,22 @@ class DiscordAuth {
     }
     
     getAvatarUrl(user) {
-        if (user.avatar) {
-            return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+        if (!user || !user.id) {
+            return 'https://cdn.discordapp.com/embed/avatars/0.png';
         }
-        return `https://cdn.discordapp.com/embed/avatars/${(parseInt(user.id) >> 22) % 6}.png`;
+        
+        const userId = String(user.id);
+        if (!/^\d{17,19}$/.test(userId)) {
+            return 'https://cdn.discordapp.com/embed/avatars/0.png';
+        }
+        
+        if (user.avatar && typeof user.avatar === 'string') {
+            if (!/^[a-zA-Z0-9_-]+$/.test(user.avatar)) {
+                return `https://cdn.discordapp.com/embed/avatars/${(parseInt(userId) >> 22) % 6}.png`;
+            }
+            return `https://cdn.discordapp.com/avatars/${userId}/${user.avatar}.png`;
+        }
+        return `https://cdn.discordapp.com/embed/avatars/${(parseInt(userId) >> 22) % 6}.png`;
     }
     
     getUsername(user) {
@@ -88,16 +100,47 @@ async function updateAuthUI() {
     
     if (discordAuth.isLoggedIn()) {
         const user = discordAuth.getUser();
+        if (!user) {
+            authContainer.innerHTML = '';
+            return;
+        }
+        
         const isAdmin = await discordAuth.isAuthorized();
         
-        authContainer.innerHTML = `
-            <div class="user-profile">
-                <img src="${discordAuth.getAvatarUrl(user)}" alt="Avatar" class="user-avatar-small">
-                <span class="user-name">${discordAuth.getUsername(user)}</span>
-                ${isAdmin ? '<a href="admin.html" class="admin-btn">Admin</a>' : ''}
-                <button class="logout-btn-small" onclick="discordAuth.logout()">Déconnexion</button>
-            </div>
-        `;
+        const safeUsername = escapeHtml(discordAuth.getUsername(user));
+        const avatarUrl = discordAuth.getAvatarUrl(user);
+        const safeAvatarUrl = sanitizeUrl(avatarUrl) || 'https://cdn.discordapp.com/embed/avatars/0.png';
+        
+        authContainer.innerHTML = '';
+        const userProfile = document.createElement('div');
+        userProfile.className = 'user-profile';
+        
+        const avatarImg = document.createElement('img');
+        avatarImg.src = safeAvatarUrl;
+        avatarImg.alt = 'Avatar';
+        avatarImg.className = 'user-avatar-small';
+        userProfile.appendChild(avatarImg);
+        
+        const userNameSpan = document.createElement('span');
+        userNameSpan.className = 'user-name';
+        userNameSpan.textContent = safeUsername;
+        userProfile.appendChild(userNameSpan);
+        
+        if (isAdmin) {
+            const adminLink = document.createElement('a');
+            adminLink.href = 'admin.html';
+            adminLink.className = 'admin-btn';
+            adminLink.textContent = 'Admin';
+            userProfile.appendChild(adminLink);
+        }
+        
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-btn-small';
+        logoutBtn.textContent = 'Déconnexion';
+        logoutBtn.addEventListener('click', () => discordAuth.logout());
+        userProfile.appendChild(logoutBtn);
+        
+        authContainer.appendChild(userProfile);
     } else {
         authContainer.innerHTML = `
             <button class="discord-login-btn-small" onclick="loginWithDiscord()">
