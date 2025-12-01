@@ -449,4 +449,180 @@ document.addEventListener('DOMContentLoaded', () => {
             loadOrganigramme();
         }
     }, 5000);
+
+    const recruitmentBtn = document.getElementById('recrutement-btn');
+    const recruitmentModal = document.getElementById('recruitment-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    
+    if (recruitmentBtn && recruitmentModal) {
+        recruitmentBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openRecruitmentModal();
+        });
+    }
+    
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', closeRecruitmentModal);
+    }
+    
+    if (recruitmentModal) {
+        recruitmentModal.addEventListener('click', (e) => {
+            if (e.target === recruitmentModal) {
+                closeRecruitmentModal();
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && recruitmentModal.classList.contains('active')) {
+                closeRecruitmentModal();
+            }
+        });
+    }
+    
+    const recruitmentForm = document.getElementById('recruitment-form');
+    if (recruitmentForm) {
+        recruitmentForm.addEventListener('submit', handleRecruitmentSubmit);
+    }
 });
+
+function openRecruitmentModal() {
+    const modal = document.getElementById('recruitment-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        requestAnimationFrame(() => {
+            modal.classList.add('active');
+        });
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeRecruitmentModal() {
+    const modal = document.getElementById('recruitment-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            if (!modal.classList.contains('active')) {
+                modal.style.display = 'none';
+            }
+        }, 200);
+        document.body.style.overflow = '';
+    }
+}
+
+function truncateText(text, maxLength = 1024) {
+    if (!text || text.length <= maxLength) {
+        return text || '';
+    }
+    return text.substring(0, maxLength - 3) + '...';
+}
+
+async function handleRecruitmentSubmit(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const submitButton = form.querySelector('.submit-button');
+    const messageDiv = document.getElementById('form-message');
+    
+    submitButton.disabled = true;
+    submitButton.textContent = 'Envoi en cours...';
+    messageDiv.className = 'form-message';
+    messageDiv.style.display = 'none';
+    
+    const nomPrenom = form.querySelector('#nom-prenom').value.trim();
+    const emailDiscord = form.querySelector('#email-discord').value.trim();
+    const motivations = form.querySelector('#motivations').value.trim();
+    const experiences = form.querySelector('#experiences').value.trim();
+    const espritEquipeRadio = form.querySelector('input[name="esprit-equipe"]:checked');
+    const espritEquipe = espritEquipeRadio ? espritEquipeRadio.value === 'oui' : false;
+    const motFin = form.querySelector('#mot-fin').value.trim();
+    
+    if (!nomPrenom || !emailDiscord || !motivations || !espritEquipeRadio) {
+        messageDiv.className = 'form-message error';
+        messageDiv.textContent = 'Veuillez remplir tous les champs obligatoires.';
+        messageDiv.style.display = 'block';
+        submitButton.disabled = false;
+        submitButton.textContent = 'Envoyer ma candidature';
+        return;
+    }
+    
+    const webhookUrl = 'https://discord.com/api/webhooks/1387143202825441332/OugXbubAkFW7B_ntaKlfY-nQwPKqQU225kERi4Lze6Q_74B-rJ0cUw_-n1WilcX2AEl0';
+    const roleId = '1115376476875923476';
+    
+    const embed = {
+        title: '🎯 Nouvelle Candidature',
+        color: 0xc41e3a,
+        fields: [
+            {
+                name: '👤 Nom & Prénom',
+                value: truncateText(escapeHtml(nomPrenom)) || '*Non renseigné*',
+                inline: false
+            },
+            {
+                name: '📧 Email / Pseudo Discord',
+                value: truncateText(escapeHtml(emailDiscord)) || '*Non renseigné*',
+                inline: false
+            },
+            {
+                name: '💭 Motivations',
+                value: truncateText(escapeHtml(motivations)) || '*Non renseigné*',
+                inline: false
+            },
+            {
+                name: '📚 Expériences',
+                value: truncateText(escapeHtml(experiences)) || '*Aucune expérience renseignée*',
+                inline: false
+            },
+            {
+                name: '🤝 Esprit d\'équipe',
+                value: espritEquipe ? '✅ Oui' : '❌ Non',
+                inline: true
+            },
+            {
+                name: '💬 Le mot de la fin',
+                value: truncateText(escapeHtml(motFin)) || '*Aucun message*',
+                inline: false
+            }
+        ],
+        timestamp: new Date().toISOString(),
+        footer: {
+            text: 'Formulaire de recrutement - Oishi Nigiri'
+        }
+    };
+    
+    const payload = {
+        content: `<@&${roleId}>`,
+        embeds: [embed]
+    };
+    
+    try {
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            messageDiv.className = 'form-message success';
+            messageDiv.textContent = '✅ Votre candidature a été envoyée avec succès ! Nous vous recontacterons bientôt.';
+            messageDiv.style.display = 'block';
+            form.reset();
+            
+            setTimeout(() => {
+                closeRecruitmentModal();
+                submitButton.disabled = false;
+                submitButton.textContent = 'Envoyer ma candidature';
+            }, 2000);
+        } else {
+            throw new Error('Erreur lors de l\'envoi');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi du formulaire:', error);
+        messageDiv.className = 'form-message error';
+        messageDiv.textContent = '❌ Une erreur est survenue lors de l\'envoi. Veuillez réessayer plus tard.';
+        messageDiv.style.display = 'block';
+        submitButton.disabled = false;
+        submitButton.textContent = 'Envoyer ma candidature';
+    }
+}
