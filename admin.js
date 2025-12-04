@@ -69,10 +69,6 @@ async function checkAuth() {
                     localStorage.setItem('discordToken', accessToken);
                     localStorage.setItem('isAdmin', 'true');
                     showAdminPanel(userInfo);
-                    loadMenuConfig();
-                    loadCategories();
-                    loadMenuItems();
-                    loadTeamMembers();
                     window.history.replaceState({}, document.title, window.location.pathname);
                     return;
                 } else {
@@ -94,10 +90,6 @@ async function checkAuth() {
             localStorage.setItem('discordToken', discordToken);
             localStorage.setItem('isAdmin', 'true');
             showAdminPanel(user);
-            loadMenuConfig();
-            loadCategories();
-            loadMenuItems();
-            loadTeamMembers();
         } else {
             showError('Vous n\'êtes pas autorisé à accéder au panel admin.');
             showLoginScreen();
@@ -196,6 +188,53 @@ function showAdminPanel(user) {
     }
     if (addRankBtn) {
         addRankBtn.style.display = hasPermission('ranks') ? '' : 'none';
+    }
+
+    const allTabButtons = document.querySelectorAll('.tab-btn');
+    const allTabContents = document.querySelectorAll('.tab-content');
+    allTabButtons.forEach(btn => btn.classList.remove('active'));
+    allTabContents.forEach(content => content.classList.remove('active'));
+    
+    const visibleTabs = ['menu', 'team', 'sales', 'history', 'employees', 'ranks', 'admins'];
+    let firstVisibleTab = null;
+    
+    for (const tabName of visibleTabs) {
+        const tabBtn = document.querySelector(`[data-tab="${tabName}"]`);
+        if (tabBtn && tabBtn.style.display !== 'none') {
+            firstVisibleTab = tabName;
+            break;
+        }
+    }
+    
+    if (firstVisibleTab) {
+        const firstTabBtn = document.querySelector(`[data-tab="${firstVisibleTab}"]`);
+        const firstTabContent = document.getElementById(`tab-${firstVisibleTab}`);
+        if (firstTabBtn) {
+            firstTabBtn.classList.add('active');
+        }
+        if (firstTabContent) {
+            firstTabContent.classList.add('active');
+        }
+        
+        if (firstVisibleTab === 'sales') {
+            loadSales();
+            loadEmployeeSales();
+            loadBonusesTable();
+        } else if (firstVisibleTab === 'history') {
+            loadHistory();
+        } else if (firstVisibleTab === 'employees') {
+            loadEmployees();
+        } else if (firstVisibleTab === 'ranks') {
+            loadRanks();
+        } else if (firstVisibleTab === 'admins') {
+            loadAdmins();
+        } else if (firstVisibleTab === 'menu') {
+            loadMenuConfig();
+            loadCategories();
+            loadMenuItems();
+        } else if (firstVisibleTab === 'team') {
+            loadTeamMembers();
+        }
     }
     
     if (window.location.search || window.location.hash) {
