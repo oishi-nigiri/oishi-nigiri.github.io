@@ -222,13 +222,15 @@ async function getDiscordUserInfo(accessToken) {
 }
 
 function isSuperAdmin(userId) {
+    const userIdString = String(userId);
+    
     if (typeof DISCORD_CONFIG !== 'undefined' && DISCORD_CONFIG.adminManagerIds) {
-        if (DISCORD_CONFIG.adminManagerIds.includes(userId)) {
+        if (DISCORD_CONFIG.adminManagerIds.includes(userIdString)) {
             return true;
         }
     }
     
-    if (typeof ADMIN_IDS !== 'undefined' && ADMIN_IDS.includes(userId)) {
+    if (typeof ADMIN_IDS !== 'undefined' && ADMIN_IDS.includes(userIdString)) {
         return true;
     }
     
@@ -239,7 +241,10 @@ async function checkAdminStatus(userId) {
     if (!userId) return false;
     
     try {
-        if (isSuperAdmin(userId)) {
+        // S'assurer que l'ID est une string
+        const userIdString = String(userId);
+        
+        if (isSuperAdmin(userIdString)) {
             localStorage.setItem('adminPermissions', JSON.stringify({
                 menu: true,
                 team: true,
@@ -252,12 +257,14 @@ async function checkAdminStatus(userId) {
             return true;
         }
         
-        const adminDoc = await db.collection('admins').doc(userId).get();
-        if (adminDoc.exists && adminDoc.data().isAdmin === true) {
+        const adminDoc = await db.collection('admins').doc(userIdString).get();
+        if (adminDoc.exists) {
             const adminData = adminDoc.data();
-            localStorage.setItem('adminPermissions', JSON.stringify(adminData.permissions || {}));
-            localStorage.setItem('isSuperAdmin', 'false');
-            return true;
+            if (adminData.isAdmin === true) {
+                localStorage.setItem('adminPermissions', JSON.stringify(adminData.permissions || {}));
+                localStorage.setItem('isSuperAdmin', 'false');
+                return true;
+            }
         }
         
         return false;
@@ -2166,10 +2173,13 @@ async function saveAdmin() {
         return;
     }
     
+    // S'assurer que l'ID Discord est une string
+    const discordIdString = String(discordId);
+    
     showLoading(true);
     try {
         const adminData = {
-            discordId,
+            discordId: discordIdString,
             username: username || null,
             isAdmin: true,
             permissions,
@@ -2177,9 +2187,9 @@ async function saveAdmin() {
         };
         
         if (currentEditingAdminId) {
-            await db.collection('admins').doc(currentEditingAdminId).update(adminData);
+            await db.collection('admins').doc(String(currentEditingAdminId)).update(adminData);
         } else {
-            await db.collection('admins').doc(discordId).set(adminData);
+            await db.collection('admins').doc(discordIdString).set(adminData);
         }
         
         closeAdminModal();

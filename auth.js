@@ -35,15 +35,20 @@ class DiscordAuth {
         const user = this.getUser();
         if (!user) return false;
         
-        if (DISCORD_CONFIG.adminManagerIds && DISCORD_CONFIG.adminManagerIds.includes(user.id)) {
+        const userId = String(user.id);
+        
+        if (DISCORD_CONFIG.adminManagerIds && DISCORD_CONFIG.adminManagerIds.includes(userId)) {
             return true;
         }
         
         try {
             if (typeof firebase !== 'undefined' && firebase.firestore) {
                 const db = firebase.firestore();
-                const doc = await db.collection('admins').doc(user.id).get();
-                return doc.exists && doc.data().isAdmin === true;
+                const doc = await db.collection('admins').doc(userId).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    return data.isAdmin === true;
+                }
             }
         } catch (error) {
             console.error('Erreur lors de la vérification Firestore:', error);
