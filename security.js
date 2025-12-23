@@ -73,19 +73,37 @@ function validateDiscordToken(token) {
     return true;
 }
 
+// Protection de sécurité - Désactivée en développement pour faciliter le débogage
 (function() {
     'use strict';
-    
+
+    // Permettre le débogage en développement (localhost)
+    const isDevelopment = window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname.includes('github.dev') ||
+                         window.location.hostname.includes('vscode.dev');
+
+    if (isDevelopment) {
+        console.log('🔧 Mode développement détecté - Protections de sécurité désactivées pour faciliter le débogage');
+        return;
+    }
+
+    // Protections activées seulement en production
+    console.log('🔒 Protections de sécurité activées');
+
+    // Désactiver le clic droit
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
         return false;
     }, false);
-    
+
+    // Désactiver certains raccourcis clavier (mais pas F12 pour permettre le débogage d'urgence)
     document.addEventListener('keydown', function(e) {
-        if (e.keyCode === 123) {
-            e.preventDefault();
-            return false;
-        }
+        // Garder F12 disponible pour le débogage d'urgence
+        // if (e.keyCode === 123) {
+        //     e.preventDefault();
+        //     return false;
+        // }
         if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
             e.preventDefault();
             return false;
@@ -107,31 +125,12 @@ function validateDiscordToken(token) {
             return false;
         }
     }, false);
-    
-    let devtools = {
-        open: false,
-        orientation: null
-    };
-    
-    const threshold = 160;
-    
-    setInterval(function() {
-        if (window.outerHeight - window.innerHeight > threshold || 
-            window.outerWidth - window.innerWidth > threshold) {
-            if (!devtools.open) {
-                devtools.open = true;
-            }
-        } else {
-            if (devtools.open) {
-                devtools.open = false;
-            }
-        }
-    }, 500);
-    
+
+    // Désactiver le drag & drop
     document.addEventListener('dragstart', function(e) {
         e.preventDefault();
         return false;
     }, false);
-    
+
 })();
 
