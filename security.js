@@ -73,10 +73,25 @@ function validateDiscordToken(token) {
     return true;
 }
 
-// Protection de sécurité - Toujours activée
+// Protection de sécurité - Désactivée en développement local
 (function() {
     'use strict';
 
+    // Détecter si on est en développement local
+    const isLocalDevelopment = window.location.hostname === 'localhost' ||
+                              window.location.hostname === '127.0.0.1' ||
+                              window.location.hostname === '0.0.0.0' ||
+                              window.location.hostname.includes('localhost') ||
+                              window.location.hostname.includes('127.0.0.1') ||
+                              window.location.hostname.includes('0.0.0.0');
+
+    if (isLocalDevelopment) {
+        console.log('🔧 Mode développement local détecté - Protections de sécurité désactivées');
+        console.log('✅ Inspection des éléments autorisée en local');
+        return;
+    }
+
+    // Protections activées en production
     console.log('🔒 Protections de sécurité activées - Inspection des éléments désactivée');
 
     // Désactiver le clic droit
