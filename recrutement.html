@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recrutement - Oishi Nigiri</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="stylesheet" href="./legacy/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="./index.html" class="logo" style="text-decoration: none;">
+                <img src="./logo.png" alt="Oishi Nigiri" class="logo-img">
+                <div style="display: flex; flex-direction: column;">
+                    <span class="logo-kanji">美味しい</span>
+                    <span class="logo-text">Oishi Nigiri</span>
+                </div>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="./index.html#/">Accueil</a></li>
+                <li><a href="./index.html#/">Menu</a></li>
+                <li><a href="./index.html#/">À Propos</a></li>
+                <li><a href="./index.html#/">Équipe</a></li>
+                <li><a href="./recrutement.html" class="active">Recrutement</a></li>
+            </ul>
+            <div id="auth-container" class="auth-container"></div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="recruitment-section" style="padding-top: 8rem;">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="title-decor">━</span>
+                Recrutement
+                <span class="title-decor">━</span>
+            </h2>
+            <div class="recruitment-content">
+                <p class="recruitment-intro">
+                    Vous souhaitez rejoindre notre équipe ? Remplissez le formulaire ci-dessous et nous vous recontacterons rapidement.
+                </p>
+                <form id="recruitment-form" class="recruitment-form">
+                    <div class="form-group">
+                        <label for="nom-prenom">Nom & Prénom *</label>
+                        <input type="text" id="nom-prenom" name="nom-prenom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email-discord">Email / Pseudo Discord *</label>
+                        <input type="text" id="email-discord" name="email-discord" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="motivations">Motivations *</label>
+                        <textarea id="motivations" name="motivations" rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="experiences">Expériences</label>
+                        <textarea id="experiences" name="experiences" rows="5"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Avez-vous l'esprit d'équipe ? *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="esprit-equipe" value="oui" required>
+                                <span>Oui</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="esprit-equipe" value="non" required>
+                                <span>Non</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mot-fin">Le mot de la fin</label>
+                        <textarea id="mot-fin" name="mot-fin" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="submit-button">Envoyer ma candidature</button>
+                    <div id="form-message" class="form-message"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Oishi Nigiri</h3>
+                    <p>L'authenticité du Japon dans chaque bouchée.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="./index.html#/">Accueil</a></li>
+                        <li><a href="./index.html#/">Menu</a></li>
+                        <li><a href="./index.html#/">À Propos</a></li>
+                        <li><a href="./recrutement.html">Recrutement</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Oishi Nigiri GPRP. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="./config.js"></script>
+    <script src="./security.js"></script>
+    <script src="./legacy/firebase-config.js"></script>
+    <script src="./legacy/auth.js"></script>
+    <script src="./legacy/script.js"></script>
+</body>
+</html>
+
