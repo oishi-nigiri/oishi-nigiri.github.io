@@ -1269,12 +1269,12 @@ async function loadSales() {
                 <td><strong>${parseFloat(sale.amount).toFixed(2)} €</strong></td>
                 <td>${commission.toFixed(2)} € <small style="color: var(--color-text-light);">(salaire)</small></td>
                 <td class="table-actions">
-                    <button class="btn-icon" onclick="editSale('${sale.id}')" title="Modifier">
+                    ${hasPermission('admins') ? `<button class="btn-icon" onclick="editSale('${sale.id}')" title="Modifier">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
-                    </button>
+                    </button>` : ''}
                     <button class="btn-icon danger" onclick="deleteSale('${sale.id}')" title="Supprimer">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M3 6h18"></path>
