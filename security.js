@@ -73,23 +73,11 @@ function validateDiscordToken(token) {
     return true;
 }
 
-// Protection de sécurité - Désactivée en développement pour faciliter le débogage
+// Protection de sécurité - Toujours activée
 (function() {
     'use strict';
 
-    // Permettre le débogage en développement (localhost)
-    const isDevelopment = window.location.hostname === 'localhost' ||
-                         window.location.hostname === '127.0.0.1' ||
-                         window.location.hostname.includes('github.dev') ||
-                         window.location.hostname.includes('vscode.dev');
-
-    if (isDevelopment) {
-        console.log('🔧 Mode développement détecté - Protections de sécurité désactivées pour faciliter le débogage');
-        return;
-    }
-
-    // Protections activées seulement en production
-    console.log('🔒 Protections de sécurité activées');
+    console.log('🔒 Protections de sécurité activées - Inspection des éléments désactivée');
 
     // Désactiver le clic droit
     document.addEventListener('contextmenu', function(e) {
@@ -97,29 +85,34 @@ function validateDiscordToken(token) {
         return false;
     }, false);
 
-    // Désactiver certains raccourcis clavier (mais pas F12 pour permettre le débogage d'urgence)
+    // Désactiver tous les raccourcis clavier de débogage
     document.addEventListener('keydown', function(e) {
-        // Garder F12 disponible pour le débogage d'urgence
-        // if (e.keyCode === 123) {
-        //     e.preventDefault();
-        //     return false;
-        // }
+        // Bloquer F12 (DevTools)
+        if (e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+        // Bloquer Ctrl+Shift+I (Inspect Element)
         if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
             e.preventDefault();
             return false;
         }
+        // Bloquer Ctrl+Shift+J (Console)
         if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
             e.preventDefault();
             return false;
         }
+        // Bloquer Ctrl+Shift+C (Inspect Element)
         if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
             e.preventDefault();
             return false;
         }
+        // Bloquer Ctrl+U (View Source)
         if (e.ctrlKey && e.keyCode === 85) {
             e.preventDefault();
             return false;
         }
+        // Bloquer Ctrl+S (Save Page)
         if (e.ctrlKey && e.keyCode === 83) {
             e.preventDefault();
             return false;
@@ -131,6 +124,28 @@ function validateDiscordToken(token) {
         e.preventDefault();
         return false;
     }, false);
+
+    // Détection d'ouverture des DevTools
+    let devtools = {
+        open: false,
+        orientation: null
+    };
+
+    const threshold = 160;
+
+    setInterval(function() {
+        if (window.outerHeight - window.innerHeight > threshold ||
+            window.outerWidth - window.innerWidth > threshold) {
+            if (!devtools.open) {
+                devtools.open = true;
+                console.log('⚠️ DevTools détectés - Fermez les outils de développement');
+            }
+        } else {
+            if (devtools.open) {
+                devtools.open = false;
+            }
+        }
+    }, 500);
 
 })();
 
