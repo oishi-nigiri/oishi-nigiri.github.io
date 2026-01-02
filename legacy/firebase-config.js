@@ -1,10 +1,10 @@
 const firebaseConfig = {
-    apiKey: "AIzaSyA__e798LgpiDfoBZXE7mynRxAajhQZT8o",
-    authDomain: "oishi-nigiri.firebaseapp.com",
-    projectId: "oishi-nigiri",
-    storageBucket: "oishi-nigiri.firebasestorage.app",
-    messagingSenderId: "235045203402",
-    appId: "1:235045203402:web:442b84e7b4720f33d1f333"
+    apiKey: "AIzaSyAXKz92oCBiOusUfyVfPMU1_1ALT7Xl5y8",
+    authDomain: "depannage-3j-42a27.firebaseapp.com",
+    projectId: "depannage-3j-42a27",
+    storageBucket: "depannage-3j-42a27.firebasestorage.app",
+    messagingSenderId: "512983254056",
+    appId: "1:512983254056:web:0abeff1b009a4bc375a11d"
 };
 
 
