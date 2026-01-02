@@ -73,94 +73,18 @@ function validateDiscordToken(token) {
     return true;
 }
 
-// Protection de sécurité - Désactivée en développement local
+// Protection de sécurité - Désactivée
 (function() {
     'use strict';
 
-    // Détecter si on est en développement local
-    const isLocalDevelopment = window.location.hostname === 'localhost' ||
-                              window.location.hostname === '127.0.0.1' ||
-                              window.location.hostname === '0.0.0.0' ||
-                              window.location.hostname.includes('localhost') ||
-                              window.location.hostname.includes('127.0.0.1') ||
-                              window.location.hostname.includes('0.0.0.0');
+    // Protections désactivées pour permettre l'inspection des éléments
+    console.log('🔓 Protections de sécurité désactivées - Inspection des éléments autorisée');
 
-    if (isLocalDevelopment) {
-        console.log('🔧 Mode développement local détecté - Protections de sécurité désactivées');
-        console.log('✅ Inspection des éléments autorisée en local');
-        return;
-    }
-
-    // Protections activées en production
-    console.log('🔒 Protections de sécurité activées - Inspection des éléments désactivée');
-
-    // Désactiver le clic droit
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-    }, false);
-
-    // Désactiver tous les raccourcis clavier de débogage
-    document.addEventListener('keydown', function(e) {
-        // Bloquer F12 (DevTools)
-        if (e.keyCode === 123) {
-            e.preventDefault();
-            return false;
-        }
-        // Bloquer Ctrl+Shift+I (Inspect Element)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-            e.preventDefault();
-            return false;
-        }
-        // Bloquer Ctrl+Shift+J (Console)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
-            e.preventDefault();
-            return false;
-        }
-        // Bloquer Ctrl+Shift+C (Inspect Element)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
-            e.preventDefault();
-            return false;
-        }
-        // Bloquer Ctrl+U (View Source)
-        if (e.ctrlKey && e.keyCode === 85) {
-            e.preventDefault();
-            return false;
-        }
-        // Bloquer Ctrl+S (Save Page)
-        if (e.ctrlKey && e.keyCode === 83) {
-            e.preventDefault();
-            return false;
-        }
-    }, false);
-
-    // Désactiver le drag & drop
-    document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-        return false;
-    }, false);
-
-    // Détection d'ouverture des DevTools
-    let devtools = {
-        open: false,
-        orientation: null
-    };
-
-    const threshold = 160;
-
-    setInterval(function() {
-        if (window.outerHeight - window.innerHeight > threshold ||
-            window.outerWidth - window.innerWidth > threshold) {
-            if (!devtools.open) {
-                devtools.open = true;
-                console.log('⚠️ DevTools détectés - Fermez les outils de développement');
-            }
-        } else {
-            if (devtools.open) {
-                devtools.open = false;
-            }
-        }
-    }, 500);
+    // Les protections suivantes ont été supprimées :
+    // - Désactivation du clic droit
+    // - Désactivation des raccourcis clavier (F12, Ctrl+Shift+I, etc.)
+    // - Désactivation du drag & drop
+    // - Détection d'ouverture des DevTools
 
 })();
 
