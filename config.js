@@ -20,7 +20,7 @@ function getRedirectUri() {
 
 if (!window.DISCORD_CONFIG) {
     window.DISCORD_CONFIG = {
-        clientId: '676846952561901608',
+        clientId: '1456749394597646570',
         redirectUri: getRedirectUri(),
         scope: 'identify',
         adminManagerIds: [
