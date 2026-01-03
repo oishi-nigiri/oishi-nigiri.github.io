@@ -73,18 +73,46 @@ function validateDiscordToken(token) {
     return true;
 }
 
-// Protection de sécurité - Désactivée
+// Protection de sécurité - Activée
 (function() {
     'use strict';
 
-    // Protections désactivées pour permettre l'inspection des éléments
-    console.log('🔓 Protections de sécurité désactivées - Inspection des éléments autorisée');
+    console.log('🔒 Protections de sécurité activées - Inspection des éléments bloquée');
 
-    // Les protections suivantes ont été supprimées :
-    // - Désactivation du clic droit
-    // - Désactivation des raccourcis clavier (F12, Ctrl+Shift+I, etc.)
-    // - Désactivation du drag & drop
-    // - Détection d'ouverture des DevTools
+    // Désactivation du clic droit
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    // Désactivation des raccourcis clavier (F12, Ctrl+Shift+I, Ctrl+U, etc.)
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' ||
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+            (e.ctrlKey && e.key === 'U') ||
+            (e.ctrlKey && e.shiftKey && e.key === 'K')) {
+            e.preventDefault();
+            alert('Inspection des éléments désactivée');
+        }
+    });
+
+    // Désactivation du drag & drop
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+    });
+
+    // Détection basique d'ouverture des DevTools (non fiable à 100%)
+    let devtoolsOpen = false;
+    const threshold = 160;
+    setInterval(function() {
+        if (window.outerHeight - window.innerHeight > threshold || window.outerWidth - window.innerWidth > threshold) {
+            if (!devtoolsOpen) {
+                devtoolsOpen = true;
+                alert('DevTools détectés ! Fermez-les pour continuer.');
+            }
+        } else {
+            devtoolsOpen = false;
+        }
+    }, 500);
 
 })();
 
