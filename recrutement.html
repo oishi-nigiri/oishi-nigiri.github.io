@@ -1,37 +1,25 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recrutement - Oishi Nigiri</title>
     <link rel="icon" type="image/png" href="logo.png">
-    <link rel="stylesheet" href="./recrutement-styles.css?v=1768073797023">
+    <link rel="stylesheet" href="./legacy/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=1768073797023">
 </head>
 <body>
-    <!-- Navigation moderne avec thème -->
     <nav class="navbar">
         <div class="container">
-            <div class="logo-section">
-                <div class="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+            <a href="./index.html" class="logo" style="text-decoration: none;">
+                <img src="./logo.png" alt="Oishi Nigiri" class="logo-img">
+                <div style="display: flex; flex-direction: column;">
+                    <span class="logo-kanji">美味しい</span>
+                    <span class="logo-text">Oishi Nigiri</span>
                 </div>
-                <a href="./index.html" class="logo">
-                    <img src="./logo.png" alt="Oishi Nigiri" class="logo-img">
-                    <div class="logo-text-container">
-                        <span class="logo-kanji">美味しい</span>
-                        <span class="logo-text">Oishi Nigiri</span>
-                    </div>
-                </a>
-            </div>
+            </a>
             <ul class="nav-menu">
                 <li><a href="./index.html#/">Accueil</a></li>
                 <li><a href="./index.html#/">Menu</a></li>
@@ -39,228 +27,82 @@
                 <li><a href="./index.html#/">Équipe</a></li>
                 <li><a href="./recrutement.html" class="active">Recrutement</a></li>
             </ul>
-            <div class="nav-right">
-                <button onclick="toggleTheme()" class="theme-toggle-btn" title="Changer de thème">
-                    <i class="fas fa-moon" id="theme-icon"></i>
-                </button>
+            <div id="auth-container" class="auth-container"></div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
-        <div v-if="menuOpen" class="menu-overlay" @click="closeMenu()"></div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="recruitment-hero">
-        <div class="hero-background">
-            <div class="hero-overlay"></div>
-            <div class="hero-pattern"></div>
-        </div>
-        <div class="hero-content">
-            <h1 class="hero-title">
-                <span class="hero-kanji">求人</span>
-                <span class="hero-subtitle">Recrutement</span>
-            </h1>
-            <p class="hero-description">
-                Devenez partie intégrante de l'expérience Oishi Nigiri.
-                Rejoignez une équipe passionnée par l'excellence culinaire japonaise.
-            </p>
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <div class="stat-number">4.8</div>
-                    <div class="stat-label">Note équipe</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Satisfaction</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section Combinée : Avantages + Formulaire -->
-    <section class="combined-section">
+    <section class="recruitment-section" style="padding-top: 8rem;">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <span class="title-decor">━</span>
-                    Rejoignez Notre Équipe
-                    <span class="title-decor">━</span>
-                </h2>
-                <p class="section-description">Découvrez nos avantages et postulez en ligne</p>
-            </div>
-
-            <div class="combined-content">
-                <!-- Avantages à gauche -->
-                <div class="advantages-panel">
-                    <h3>Pourquoi Nous Rejoindre ?</h3>
-                    <div class="advantages-grid">
-                        <div class="advantage-card">
-                            <div class="advantage-icon">
-                                <i class="fas fa-utensils"></i>
-                            </div>
-                            <h4>Cuisine d'Exception</h4>
-                            <p>Ingrédients premium et art de la cuisine japonaise authentique.</p>
-                        </div>
-
-                        <div class="advantage-card">
-                            <div class="advantage-icon">
-                                <i class="fas fa-graduation-cap"></i>
-                            </div>
-                            <h4>Formation Expert</h4>
-                            <p>Formation complète par nos chefs maîtres sushi expérimentés.</p>
-                        </div>
-
-                        <div class="advantage-card">
-                            <div class="advantage-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h4>Équipe Unie</h4>
-                            <p>Entraide et partage d'expérience au quotidien.</p>
-                        </div>
-
-                        <div class="advantage-card">
-                            <div class="advantage-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <h4>Horaires Adaptés</h4>
-                            <p>Équilibre vie professionnelle/personnelle respecté.</p>
-                        </div>
+            <h2 class="section-title">
+                <span class="title-decor">━</span>
+                Recrutement
+                <span class="title-decor">━</span>
+            </h2>
+            <div class="recruitment-content">
+                <p class="recruitment-intro">
+                    Vous souhaitez rejoindre notre équipe ? Remplissez le formulaire ci-dessous et nous vous recontacterons rapidement.
+                </p>
+                <form id="recruitment-form" class="recruitment-form">
+                    <div class="form-group">
+                        <label for="nom-prenom">Nom & Prénom *</label>
+                        <input type="text" id="nom-prenom" name="nom-prenom" required>
                     </div>
-                </div>
-
-                <!-- Formulaire à droite -->
-                <div class="application-panel">
-                    <div class="application-card">
-                        <div class="application-header">
-                            <h3 class="application-title">
-                                <i class="fas fa-paper-plane"></i>
-                                Postulez Maintenant
-                            </h3>
-                            <p class="application-description">
-                                Remplissez ce formulaire, nous vous recontactons sous 48h.
-                            </p>
-                        </div>
-
-                <form id="recruitment-form" class="application-form">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="nom-prenom">
-                                <i class="fas fa-user"></i>
-                                Nom & Prénom *
-                            </label>
-                            <input type="text" id="nom-prenom" name="nom-prenom" required placeholder="Votre nom complet">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">
-                                <i class="fas fa-envelope"></i>
-                                Email *
-                            </label>
-                            <input type="email" id="email" name="email" required placeholder="votre@email.com">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="telephone">
-                                <i class="fas fa-phone"></i>
-                                Téléphone
-                            </label>
-                            <input type="tel" id="telephone" name="telephone" placeholder="06 XX XX XX XX">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="poste">
-                                <i class="fas fa-briefcase"></i>
-                                Poste souhaité *
-                            </label>
-                            <select id="poste" name="poste" required>
-                                <option value="">Choisissez un poste</option>
-                                <option value="sushi-chef">Sushi Chef</option>
-                                <option value="serveur">Serveur(se)</option>
-                                <option value="hote">Hôte d'accueil</option>
-                                <option value="entretien">Agent d'entretien</option>
-                                <option value="autre">Autre</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label for="email-discord">Email / Pseudo Discord *</label>
+                        <input type="text" id="email-discord" name="email-discord" required>
                     </div>
-
-                    <div class="form-group full-width">
-                        <label for="motivations">
-                            <i class="fas fa-heart"></i>
-                            Motivations *
-                        </label>
-                        <textarea id="motivations" name="motivations" rows="4" required
-                            placeholder="Pourquoi souhaitez-vous travailler chez Oishi Nigiri ? Qu'est-ce qui vous motive dans la cuisine japonaise ?"></textarea>
+                    <div class="form-group">
+                        <label for="motivations">Motivations *</label>
+                        <textarea id="motivations" name="motivations" rows="5" required></textarea>
                     </div>
-
-                    <div class="form-group full-width">
-                        <label for="experiences">
-                            <i class="fas fa-graduation-cap"></i>
-                            Expériences professionnelles
-                        </label>
-                        <textarea id="experiences" name="experiences" rows="4"
-                            placeholder="Décrivez vos expériences professionnelles, particulièrement dans la restauration..."></textarea>
+                    <div class="form-group">
+                        <label for="experiences">Expériences</label>
+                        <textarea id="experiences" name="experiences" rows="5"></textarea>
                     </div>
-
-                    <div class="form-group full-width">
-                        <label for="disponibilites">
-                            <i class="fas fa-calendar"></i>
-                            Disponibilités *
-                        </label>
-                        <textarea id="disponibilites" name="disponibilites" rows="3" required
-                            placeholder="Quels sont vos créneaux de disponibilité ? (jours, horaires...)"></textarea>
-                    </div>
-
-                    <div class="form-group radio-group">
-                        <label>
-                            <i class="fas fa-users"></i>
-                            Avez-vous l'esprit d'équipe ? *
-                        </label>
-                        <div class="radio-options">
-                            <label class="radio-option">
+                    <div class="form-group">
+                        <label>Avez-vous l'esprit d'équipe ? *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
                                 <input type="radio" name="esprit-equipe" value="oui" required>
-                                <span class="radio-text">Oui, je suis quelqu'un d'équipe</span>
+                                <span>Oui</span>
                             </label>
-                            <label class="radio-option">
+                            <label class="radio-label">
                                 <input type="radio" name="esprit-equipe" value="non" required>
-                                <span class="radio-text">Non, je préfère travailler seul</span>
+                                <span>Non</span>
                             </label>
                         </div>
                     </div>
-
-                    <div class="form-group full-width">
-                        <label for="message-final">
-                            <i class="fas fa-comment"></i>
-                            Un dernier mot ?
-                        </label>
-                        <textarea id="message-final" name="message-final" rows="3"
-                            placeholder="Une question ? Un message particulier ? C'est le moment !"></textarea>
+                    <div class="form-group">
+                        <label for="mot-fin">Le mot de la fin</label>
+                        <textarea id="mot-fin" name="mot-fin" rows="3"></textarea>
                     </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn-secondary" onclick="clearForm()">
-                            <i class="fas fa-eraser"></i>
-                            Effacer
-                        </button>
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                            Envoyer ma candidature
-                        </button>
-                    </div>
-
+                    <button type="submit" class="submit-button">Envoyer ma candidature</button>
                     <div id="form-message" class="form-message"></div>
                 </form>
             </div>
-                </div> <!-- Fin application-panel -->
-            </div> <!-- Fin combined-content -->
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4>Oishi Nigiri</h4>
+                    <h3>Oishi Nigiri</h3>
                     <p>L'authenticité du Japon dans chaque bouchée.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="./index.html#/">Accueil</a></li>
+                        <li><a href="./index.html#/">Menu</a></li>
+                        <li><a href="./index.html#/">À Propos</a></li>
+                        <li><a href="./recrutement.html">Recrutement</a></li>
+                    </ul>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -269,202 +111,13 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script>
-        // Variables globales
-        let menuOpen = false;
-
-        // Gestion du thème
-        function toggleTheme() {
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('theme-icon');
-            const currentTheme = html.getAttribute('data-theme');
-
-            if (currentTheme === 'dark') {
-                html.setAttribute('data-theme', 'light');
-                themeIcon.className = 'fas fa-sun';
-                localStorage.setItem('oishi-theme', 'light');
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                themeIcon.className = 'fas fa-moon';
-                localStorage.setItem('oishi-theme', 'dark');
-            }
-        }
-
-        // Initialisation du thème au chargement
-        function initTheme() {
-            const savedTheme = localStorage.getItem('oishi-theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            const themeIcon = document.getElementById('theme-icon');
-            if (themeIcon) {
-                themeIcon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-            }
-        }
-
-        // Gestion du thème
-        function toggleTheme() {
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('theme-icon');
-            const currentTheme = html.getAttribute('data-theme') || 'dark';
-
-            if (currentTheme === 'dark') {
-                html.setAttribute('data-theme', 'light');
-                themeIcon.className = 'fas fa-sun';
-                localStorage.setItem('oishi-theme', 'light');
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                themeIcon.className = 'fas fa-moon';
-                localStorage.setItem('oishi-theme', 'dark');
-            }
-        }
-
-        // Initialisation du thème
-        function initTheme() {
-            const savedTheme = localStorage.getItem('oishi-theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            const themeIcon = document.getElementById('theme-icon');
-            if (themeIcon) {
-                themeIcon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-            }
-        }
-
-        // Gestion du menu mobile
-        function toggleMenu() {
-            menuOpen = !menuOpen;
-            const hamburger = document.querySelector('.hamburger');
-            const navMenu = document.querySelector('.nav-menu');
-            const overlay = document.querySelector('.menu-overlay');
-
-            if (menuOpen) {
-                hamburger.classList.add('active');
-                navMenu.classList.add('active');
-                overlay.style.display = 'block';
-            } else {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-                overlay.style.display = 'none';
-            }
-        }
-
-        function closeMenu() {
-            if (menuOpen) {
-                toggleMenu();
-            }
-        }
-
-        // Scroll vers le formulaire
-        function scrollToForm() {
-            const formSection = document.getElementById('application-form');
-            if (formSection) {
-                formSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        }
-
-        // Effacer le formulaire
-        function clearForm() {
-            if (confirm('Êtes-vous sûr de vouloir effacer tout le formulaire ?')) {
-                document.getElementById('recruitment-form').reset();
-            }
-        }
-
-        // Gestion du formulaire
-        document.getElementById('recruitment-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const formMessage = document.getElementById('form-message');
-
-            // Validation basique
-            const requiredFields = ['nom-prenom', 'email', 'poste', 'motivations', 'disponibilites'];
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (!element.value.trim()) {
-                    element.style.borderColor = '#ef4444';
-                    isValid = false;
-                } else {
-                    element.style.borderColor = 'var(--recruitment-input-border)';
-                }
-            });
-
-            if (!isValid) {
-                formMessage.innerHTML = '<div class="error"><i class="fas fa-exclamation-triangle"></i> Veuillez remplir tous les champs obligatoires.</div>';
-                formMessage.style.display = 'block';
-                return;
-            }
-
-            // Simulation d'envoi
-            const submitBtn = this.querySelector('.btn-primary');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
-            submitBtn.disabled = true;
-
-            try {
-                // Simulation d'un délai réseau
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                formMessage.innerHTML = '<div class="success"><i class="fas fa-check-circle"></i> Candidature envoyée avec succès ! Nous vous recontacterons sous 48h.</div>';
-                formMessage.style.display = 'block';
-
-                // Reset du formulaire après succès
-                setTimeout(() => {
-                    this.reset();
-                    formMessage.style.display = 'none';
-                }, 5000);
-
-            } catch (error) {
-                formMessage.innerHTML = '<div class="error"><i class="fas fa-exclamation-triangle"></i> Erreur lors de l\'envoi. Veuillez réessayer.</div>';
-                formMessage.style.display = 'block';
-            } finally {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Gestion du scroll pour la navbar
-        function handleScroll() {
-            const navbar = document.querySelector('.navbar');
-            if (navbar) {
-                if (window.scrollY > 10) {
-                    navbar.classList.add('is-scrolled');
-                } else {
-                    navbar.classList.remove('is-scrolled');
-                }
-            }
-        }
-
-        // Initialisation au chargement
-        document.addEventListener('DOMContentLoaded', function() {
-            initTheme();
-
-            // Gestion du clic sur le hamburger
-            document.querySelector('.hamburger').addEventListener('click', toggleMenu);
-
-            // Gestion du scroll pour la navbar
-            window.addEventListener('scroll', handleScroll, { passive: true });
-            handleScroll(); // Vérifier l'état initial
-
-            // Fermeture du menu lors du redimensionnement
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768 && menuOpen) {
-                    closeMenu();
-                }
-            });
-        });
-    </script>
-</body>
-</html>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=1768073797023"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js?v=1768073797023"></script>
-    <script src="./config.js?v=1768073797023"></script>
-    <script src="./security.js?v=1768073797023"></script>
-    <script src="./legacy/firebase-config.js?v=1768073797023"></script>
-    <script src="./legacy/auth.js?v=1768073797023"></script>
-    <script src="./legacy/script.js?v=1768073797023"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="./config.js"></script>
+    <script src="./security.js"></script>
+    <script src="./legacy/firebase-config.js"></script>
+    <script src="./legacy/auth.js"></script>
+    <script src="./legacy/script.js"></script>
 </body>
 </html>
 

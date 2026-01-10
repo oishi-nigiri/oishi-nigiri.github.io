@@ -73,46 +73,65 @@ function validateDiscordToken(token) {
     return true;
 }
 
-// Protection de sécurité - Activée
 (function() {
     'use strict';
-
-    console.log('🔒 Protections de sécurité activées - Inspection des éléments bloquée');
-
-    // Désactivation du clic droit
+    
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
-    });
-
-    // Désactivation des raccourcis clavier (F12, Ctrl+Shift+I, Ctrl+U, etc.)
+        return false;
+    }, false);
+    
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'F12' ||
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-            (e.ctrlKey && e.key === 'U') ||
-            (e.ctrlKey && e.shiftKey && e.key === 'K')) {
+        if (e.keyCode === 123) {
             e.preventDefault();
-            alert('Inspection des éléments désactivée');
+            return false;
         }
-    });
-
-    // Désactivation du drag & drop
-    document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-    });
-
-    // Détection basique d'ouverture des DevTools (non fiable à 100%)
-    let devtoolsOpen = false;
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && e.keyCode === 85) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && e.keyCode === 83) {
+            e.preventDefault();
+            return false;
+        }
+    }, false);
+    
+    let devtools = {
+        open: false,
+        orientation: null
+    };
+    
     const threshold = 160;
+    
     setInterval(function() {
-        if (window.outerHeight - window.innerHeight > threshold || window.outerWidth - window.innerWidth > threshold) {
-            if (!devtoolsOpen) {
-                devtoolsOpen = true;
-                alert('DevTools détectés ! Fermez-les pour continuer.');
+        if (window.outerHeight - window.innerHeight > threshold || 
+            window.outerWidth - window.innerWidth > threshold) {
+            if (!devtools.open) {
+                devtools.open = true;
             }
         } else {
-            devtoolsOpen = false;
+            if (devtools.open) {
+                devtools.open = false;
+            }
         }
     }, 500);
-
+    
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    }, false);
+    
 })();
 
