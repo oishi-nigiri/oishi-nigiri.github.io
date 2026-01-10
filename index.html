@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,8 +10,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script type="module" crossorigin src="/assets/main-400dfa02.js"></script>
-  <link rel="stylesheet" href="/assets/main-2628e93a.css">
+    <script>
+      // Appliquer le thème dark par défaut immédiatement pour éviter le flash de contenu clair
+      (function() {
+        const savedTheme = localStorage.getItem('admin-theme');
+        const theme = (savedTheme === 'light' || savedTheme === 'dark') ? savedTheme : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  <script type="module" crossorigin src="/assets/main-1ddc6fb1.js"></script>
+  <link rel="stylesheet" href="/assets/main-dc58b9a5.css">
 </head>
 <body>
     <div id="app"></div>
