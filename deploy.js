@@ -271,7 +271,7 @@ try {
   // Push seulement s'il y a des changements
   if (hasChanges) {
     console.log('📤 Push vers GitHub...');
-    execSync(`git push origin ${finalBranch}`, { 
+    execSync(`git push origin ${finalBranch} --force`, { 
       stdio: 'inherit', 
       cwd: join(__dirname, TEMP_DIR) 
     });
