@@ -115,184 +115,159 @@ onMounted(() => {
 
 <style scoped>
 .weekly-menu-section {
-  background: white;
+  background: #0f0f0f;
   padding: 5rem 0;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 1.5rem;
 }
 
 .section-title {
   text-align: center;
   font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   margin-bottom: 3rem;
-  color: #2c1810;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  color: #fff;
+  font-weight: 400;
+  letter-spacing: 4px;
+  text-transform: uppercase;
 }
 
-.title-decor {
-  color: #c41e3a;
-  font-size: 2rem;
+.section-title .title-decor {
+  color: #e85a4f;
+  margin: 0 1rem;
 }
 
 .loading-menu {
-  grid-column: 1 / -1;
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
 }
 
 .weekly-menu-image-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .weekly-menu-image {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
 .weekly-menu-image:hover {
-  transform: scale(1.02);
+  transform: scale(1.01);
 }
 
 .weekly-menu-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .weekly-menu-category-section {
   grid-column: 1 / -1;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .weekly-menu-category-title {
-  font-size: 2rem;
-  color: #2c1810;
-  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: #e85a4f;
+  font-weight: 400;
   margin-bottom: 1.5rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(232, 90, 79, 0.3);
   padding-bottom: 0.75rem;
-  border-bottom: 3px solid #c41e3a;
 }
 
 .weekly-menu-item {
-  background: #fff8f0;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-  border-left: 4px solid #c41e3a;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.25rem;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
 }
 
 .weekly-menu-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(232, 90, 79, 0.3);
 }
 
 .weekly-menu-item-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 0.5rem;
 }
 
 .weekly-menu-item-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.3rem;
-  color: #2c1810;
-  font-weight: 600;
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 500;
 }
 
 .weekly-menu-item-price {
-  color: #c41e3a;
-  font-weight: 700;
-  font-size: 1.3rem;
+  color: #e85a4f;
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .weekly-menu-item-description {
-  color: #666;
-  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
   line-height: 1.6;
-  margin-top: 0.75rem;
-}
-
-@media (max-width: 1024px) {
-  .weekly-menu-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
 }
 
 @media (max-width: 768px) {
   .weekly-menu-section {
-    padding: 3rem 0;
+    padding: 3.5rem 0;
   }
 
   .container {
-    padding: 0 15px;
+    padding: 0 1rem;
   }
 
   .section-title {
-    font-size: 2rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    margin-bottom: 2.5rem;
   }
 
-  .title-decor {
-    font-size: 1.5rem;
-  }
-  
   .weekly-menu-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .weekly-menu-category-title {
-    font-size: 1.5rem;
+    font-size: 1rem;
   }
 
   .weekly-menu-item {
-    padding: 1.25rem;
-  }
-
-  .weekly-menu-item-title {
-    font-size: 1.1rem;
-  }
-
-  .weekly-menu-item-price {
-    font-size: 1.1rem;
+    padding: 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .section-title {
-    font-size: 1.75rem;
+    font-size: 1.2rem;
   }
 
-  .title-decor {
+  .section-title .title-decor {
     display: none;
   }
 
   .weekly-menu-item-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 }
 </style>

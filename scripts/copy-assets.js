@@ -19,21 +19,21 @@ function copyRecursive(src, dest) {
     console.warn(`⚠️  Dossier non trouvé: ${src}`)
     return
   }
-  
+
   const stats = statSync(src)
-  
+
   if (stats.isDirectory()) {
     // Créer le dossier de destination
     if (!existsSync(dest)) {
       mkdirSync(dest, { recursive: true })
     }
-    
+
     // Copier tous les fichiers du dossier
     const files = readdirSync(src)
     files.forEach(file => {
       const srcPath = join(src, file)
       const destPath = join(dest, file)
-      
+
       if (statSync(srcPath).isDirectory()) {
         copyRecursive(srcPath, destPath)
       } else {
@@ -58,27 +58,18 @@ console.log('📦 Copie des fichiers statiques...')
 filesToCopy.forEach(({ from, to }) => {
   const fromPath = join(process.cwd(), from)
   const toPath = join(process.cwd(), to)
-  
+
   if (existsSync(fromPath)) {
     const toDir = dirname(toPath)
     if (!existsSync(toDir)) {
       mkdirSync(toDir, { recursive: true })
     }
-    
+
     copyFileSync(fromPath, toPath)
     console.log(`✅ Copié: ${from} → ${to}`)
   } else {
     console.warn(`⚠️  Fichier non trouvé: ${from}`)
   }
-})
-
-// Copier le dossier legacy nécessaire pour recrutement.html
-console.log('\n📦 Copie des fichiers legacy...')
-const legacyFiles = ['styles.css', 'firebase-config.js', 'auth.js', 'script.js']
-legacyFiles.forEach(file => {
-  const fromPath = join(process.cwd(), 'legacy', file)
-  const toPath = join(process.cwd(), 'dist', 'legacy', file)
-  copyRecursive(fromPath, toPath)
 })
 
 console.log('\n✨ Copie terminée!')

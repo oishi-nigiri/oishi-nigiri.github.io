@@ -2,187 +2,168 @@
   <div class="history-dashboard">
     <!-- Header -->
     <div class="dashboard-header">
-      <div class="header-content">
-        <div>
-          <h1 class="dashboard-title">Historique des Ventes</h1>
-          <p class="dashboard-subtitle">Consultez les périodes archivées</p>
+      <h1 class="dashboard-title">Historique des Ventes</h1>
+    </div>
+
+    <!-- Section Stats et Actions -->
+    <div class="history-overview-section">
+      <div class="history-header-block">
+        <div class="history-title-block">
+          <h2 class="history-title">Archives</h2>
+          <p class="history-subtitle">{{ history.length }} période(s) archivée(s)</p>
+        </div>
+        <div class="history-kpis">
+          <div class="kpi-item kpi-red">
+            <span class="kpi-label">PÉRIODES</span>
+            <span class="kpi-value">{{ history.length }}</span>
+          </div>
+          <div class="kpi-item kpi-green">
+            <span class="kpi-label">CA TOTAL</span>
+            <span class="kpi-value">{{ totalArchivedSales.toFixed(0) }} €</span>
+          </div>
+          <div class="kpi-item kpi-green">
+            <span class="kpi-label">SALAIRES</span>
+            <span class="kpi-value">{{ totalArchivedCommissions.toFixed(0) }} €</span>
+          </div>
+          <div class="kpi-item kpi-orange">
+            <span class="kpi-label">BÉNÉFICES</span>
+            <span class="kpi-value">{{ totalArchivedBenefits.toFixed(0) }} €</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Statistiques principales -->
-    <div v-if="!loading && history.length > 0" class="stats-grid">
-      <div class="stat-card-large primary">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
+    <!-- Main Content with Sidebar -->
+    <div class="history-main-content">
+      <!-- Left Column: Filters -->
+      <div class="left-column">
+        <!-- Filters Sidebar -->
+        <div class="filters-sidebar">
+          <div class="filters-header">
+            <h3 class="filters-title">Filtres</h3>
+            <button
+              @click="filtersExpanded = !filtersExpanded"
+              class="filters-toggle"
+            >
+              <i :class="filtersExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+            </button>
+          </div>
+
+          <div v-show="filtersExpanded" class="filters-content">
+            <div class="filter-group">
+              <label class="filter-label">Recherche</label>
+              <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Rechercher..."
+                  class="search-input"
+                />
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Tri par</label>
+              <select v-model="sortBy" class="filter-select">
+                <option value="date-desc">Date (récent)</option>
+                <option value="date-asc">Date (ancien)</option>
+                <option value="amount-desc">CA (décroissant)</option>
+                <option value="amount-asc">CA (croissant)</option>
+              </select>
+            </div>
+
+            <button @click="resetFilters" class="btn-reset-filters">
+              <i class="fas fa-times"></i>
+              <span>Réinitialiser</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Section -->
+      <div class="table-section">
+        <div v-if="loading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Chargement des données...</p>
+        </div>
+
+        <div v-else-if="filteredHistory.length === 0" class="empty-state">
+          <div class="empty-icon">
             <i class="fas fa-archive"></i>
           </div>
-          <div class="stat-info">
-            <div class="stat-label">Périodes Archivées</div>
-            <div class="stat-value-large">
-              <span>{{ history.length }}</span>
-            </div>
-          </div>
+          <h3>
+            {{ history.length === 0 ? "Aucune période archivée" : "Aucun résultat" }}
+          </h3>
+          <p>
+            {{
+              history.length === 0
+                ? "Les périodes archivées apparaîtront ici après une réinitialisation des ventes"
+                : "Aucune période ne correspond à vos critères"
+            }}
+          </p>
         </div>
-        <div class="stat-trend">
-          <i class="fas fa-calendar"></i>
-          <span>Total archivé</span>
-        </div>
-      </div>
 
-      <div class="stat-card-large success">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-euro-sign"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">CA Total Archivé</div>
-            <div class="stat-value-large">
-              <span>{{ totalArchivedSales.toFixed(2) }}</span>
-              <span class="currency">€</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-chart-bar"></i>
-          <span>Toutes périodes</span>
-        </div>
-      </div>
-
-      <div class="stat-card-large info">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-wallet"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Salaires Total</div>
-            <div class="stat-value-large">
-              <span>{{ totalArchivedCommissions.toFixed(2) }}</span>
-              <span class="currency">€</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-users"></i>
-          <span>Total versé</span>
-        </div>
-      </div>
-
-      <div class="stat-card-large" :class="totalArchivedBenefits >= 0 ? 'warning' : 'danger'">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-chart-line"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Bénéfices Total</div>
-            <div class="stat-value-large">
-              <span>{{ totalArchivedBenefits.toFixed(2) }}</span>
-              <span class="currency">€</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-percentage"></i>
-          <span>Toutes périodes</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Archives des Périodes -->
-    <div class="content-section">
-      <div class="section-header-modern">
-        <div>
-          <h2 class="section-title">Archives des Périodes</h2>
-          <p class="section-description">Consultez les statistiques des périodes archivées</p>
-        </div>
-      </div>
-
-      <div v-if="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Chargement des données...</p>
-      </div>
-      <div v-else-if="history.length === 0" class="empty-container">
-        <i class="fas fa-archive"></i>
-        <p>Aucun historique disponible. Les périodes archivées apparaîtront ici après une réinitialisation des ventes.</p>
-      </div>
-      <div v-else class="history-grid-modern">
-        <div 
-          v-for="entry in history" 
-          :key="entry.id" 
-          class="history-card-modern clickable"
-          @click="openHistoryDetailsModal(entry)"
-        >
-          <div class="card-header-modern">
-            <div class="card-icon">
-              <i class="fas fa-calendar-alt"></i>
-            </div>
-            <div class="card-info">
-              <h3 class="card-title">Période Archivée</h3>
-              <div class="card-date">{{ formatDate(entry.archivedAt) }}</div>
-            </div>
-            <div class="card-action-icon">
-              <i class="fas fa-eye"></i>
-            </div>
-          </div>
-          <div class="history-stats-modern">
-            <div class="history-stat-item">
-              <div class="stat-icon-small">
-                <i class="fas fa-shopping-cart"></i>
-              </div>
-              <div class="stat-content">
-                <div class="stat-label-small">Nombre de ventes</div>
-                <div class="stat-value-small">{{ entry.salesCount || 0 }}</div>
-              </div>
-            </div>
-            <div class="history-stat-item primary">
-              <div class="stat-icon-small">
-                <i class="fas fa-euro-sign"></i>
-              </div>
-              <div class="stat-content">
-                <div class="stat-label-small">Chiffre d'Affaires</div>
-                <div class="stat-value-small primary">
-                  <span>{{ (entry.totalSales || entry.totalAmount || 0).toFixed(2) }}</span>
-                  <span class="currency-small">€</span>
-                </div>
-              </div>
-            </div>
-            <div class="history-stat-item success">
-              <div class="stat-icon-small">
-                <i class="fas fa-wallet"></i>
-              </div>
-              <div class="stat-content">
-                <div class="stat-label-small">Total Salaires</div>
-                <div class="stat-value-small success">
-                  <span>{{ entry.totalCommissions?.toFixed(2) || '0.00' }}</span>
-                  <span class="currency-small">€</span>
-                </div>
-              </div>
-            </div>
-            <div class="history-stat-item warning">
-              <div class="stat-icon-small">
-                <i class="fas fa-gift"></i>
-              </div>
-              <div class="stat-content">
-                <div class="stat-label-small">Total Primes</div>
-                <div class="stat-value-small warning">
-                  <span>{{ entry.totalBonuses?.toFixed(2) || '0.00' }}</span>
-                  <span class="currency-small">€</span>
-                </div>
-              </div>
-            </div>
-            <div class="history-stat-item total" :class="getBenefitsClass(entry)">
-              <div class="stat-icon-small">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <div class="stat-content">
-                <div class="stat-label-small">Bénéfices</div>
-                <div class="stat-value-small total-value" :class="getBenefitsClass(entry)">
-                  <span>{{ getBenefits(entry).toFixed(2) }}</span>
-                  <span class="currency-small">€</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div v-else class="table-wrapper">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>DATE</th>
+                <th>VENTES</th>
+                <th>CHIFFRE D'AFFAIRES</th>
+                <th>COMMISSIONS</th>
+                <th>PRIMES</th>
+                <th>BÉNÉFICES</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="entry in filteredHistory" :key="entry.id">
+                <td class="date-cell">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span>{{ formatDate(entry.archivedAt) }}</span>
+                </td>
+                <td class="sales-count-cell">
+                  <span>{{ entry.salesCount || 0 }}</span>
+                </td>
+                <td class="amount-cell">
+                  <span>{{ (entry.totalSales || entry.totalAmount || 0).toFixed(2) }} €</span>
+                </td>
+                <td class="commission-cell">
+                  <span>{{ (entry.totalCommissions || 0).toFixed(2) }} €</span>
+                </td>
+                <td class="bonus-cell">
+                  <span>{{ (entry.totalBonuses || 0).toFixed(2) }} €</span>
+                </td>
+                <td class="benefits-cell" :class="getBenefitsClass(entry)">
+                  <span>{{ getBenefits(entry).toFixed(2) }} €</span>
+                </td>
+                <td class="actions-cell">
+                  <button
+                    @click="openHistoryDetailsModal(entry)"
+                    class="btn-icon"
+                    title="Voir détails"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    @click="restoreFromHistory(entry)"
+                    class="btn-icon btn-icon-restore"
+                    title="Restaurer"
+                  >
+                    <i class="fas fa-undo"></i>
+                  </button>
+                  <button
+                    @click="deleteHistory(entry.id)"
+                    class="btn-icon btn-icon-danger"
+                    title="Supprimer"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -190,16 +171,16 @@
     <!-- Modal Détails par Employé -->
     <div v-if="showHistoryDetailsModal" class="modal-overlay" @click.self="closeHistoryDetailsModal">
       <div class="history-details-modal">
-        <div class="modal-header">
+        <div class="modal-header-dark">
           <div>
             <h2 class="modal-title">Détails de la Période Archivée</h2>
             <p class="modal-subtitle">{{ formatDate(selectedHistoryEntry?.archivedAt) }}</p>
           </div>
-          <button @click="closeHistoryDetailsModal" class="modal-close">
+          <button @click="closeHistoryDetailsModal" class="modal-close-dark">
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body-dark">
           <div v-if="historyEmployeeSales.length === 0" class="empty-sales-message">
             <i class="fas fa-info-circle"></i>
             <p>Aucune donnée détaillée disponible pour cette période.</p>
@@ -270,10 +251,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useFirestore } from '../../../composables/useFirestore'
+import { useConfirm } from '../../../composables/useConfirm'
 import { getDb } from '../../../composables/useFirebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 
-const { getAll, formatDate, getAllEmployees, getAllRanks } = useFirestore()
+const { getAll, formatDate, getAllEmployees, getAllRanks, remove, create } = useFirestore()
+const { confirm, alert } = useConfirm()
 
 const history = ref([])
 const loading = ref(true)
@@ -281,6 +264,11 @@ const showHistoryDetailsModal = ref(false)
 const selectedHistoryEntry = ref(null)
 const employees = ref([])
 const ranks = ref([])
+
+// Filters
+const searchQuery = ref("")
+const sortBy = ref("date-desc")
+const filtersExpanded = ref(true)
 
 const totalArchivedSales = computed(() => {
   return history.value.reduce((sum, entry) => {
@@ -313,9 +301,45 @@ const getBenefits = (entry) => {
 
 const getBenefitsClass = (entry) => {
   const benefits = getBenefits(entry)
-  if (benefits < 0) return 'danger'
-  if (benefits > 0) return 'success'
+  if (benefits < 0) return 'benefits-danger'
+  if (benefits > 0) return 'benefits-success'
   return ''
+}
+
+const filteredHistory = computed(() => {
+  let filtered = [...history.value]
+
+  // Search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter((entry) => {
+      const dateStr = formatDate(entry.archivedAt).toLowerCase()
+      return dateStr.includes(query)
+    })
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    switch (sortBy.value) {
+      case "date-desc":
+        return b.archivedAt - a.archivedAt
+      case "date-asc":
+        return a.archivedAt - b.archivedAt
+      case "amount-desc":
+        return (b.totalSales || b.totalAmount || 0) - (a.totalSales || a.totalAmount || 0)
+      case "amount-asc":
+        return (a.totalSales || a.totalAmount || 0) - (b.totalSales || b.totalAmount || 0)
+      default:
+        return 0
+    }
+  })
+
+  return filtered
+})
+
+const resetFilters = () => {
+  searchQuery.value = ""
+  sortBy.value = "date-desc"
 }
 
 const historyEmployeeSales = computed(() => {
@@ -394,6 +418,76 @@ const closeHistoryDetailsModal = () => {
   selectedHistoryEntry.value = null
 }
 
+const deleteHistory = async (historyId) => {
+  const result = await confirm(
+    "Êtes-vous sûr de vouloir supprimer cet historique ? Cette action est irréversible.",
+    {
+      confirmText: "Supprimer",
+      cancelText: "Annuler",
+      type: "danger",
+    }
+  );
+
+  if (result) {
+    try {
+      await remove('salesHistory', historyId);
+      await alert("Historique supprimé avec succès", { type: "success" });
+      await loadData();
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      await alert("Erreur lors de la suppression de l'historique", { type: "danger" });
+    }
+  }
+}
+
+const restoreFromHistory = async (entry) => {
+  const result = await confirm(
+    `Êtes-vous sûr de vouloir restaurer ${entry.salesCount || 0} vente(s) et ${entry.bonusesCount || 0} prime(s) depuis cet historique ?`,
+    {
+      confirmText: "Restaurer",
+      cancelText: "Annuler",
+      type: "warning",
+    }
+  );
+
+  if (result) {
+    try {
+      // Restaurer les ventes
+      if (entry.sales && entry.sales.length > 0) {
+        for (const sale of entry.sales) {
+          await create("sales", {
+            date: sale.date,
+            employeeId: sale.employeeId,
+            amount: parseFloat(sale.amount || 0),
+            description: sale.description || ''
+          });
+        }
+      }
+
+      // Restaurer les primes
+      if (entry.bonuses && entry.bonuses.length > 0) {
+        for (const bonus of entry.bonuses) {
+          await create("bonuses", {
+            date: bonus.date,
+            employeeId: bonus.employeeId,
+            amount: parseFloat(bonus.amount || 0),
+            reason: bonus.reason || ''
+          });
+        }
+      }
+
+      // Supprimer l'entrée d'historique après restauration
+      await remove('salesHistory', entry.id);
+
+      await alert(`${entry.salesCount || 0} vente(s) et ${entry.bonusesCount || 0} prime(s) restaurées avec succès !`, { type: "success" });
+      await loadData();
+    } catch (error) {
+      console.error("Erreur lors de la restauration:", error);
+      await alert("Erreur lors de la restauration", { type: "danger" });
+    }
+  }
+}
+
 const loadData = async () => {
   try {
     loading.value = true
@@ -421,455 +515,248 @@ onMounted(() => {
 
 <style scoped>
 .history-dashboard {
-  animation: fadeIn 0.3s ease;
+  padding: 1rem 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Dashboard Header */
 .dashboard-header {
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 8px 24px rgba(196, 30, 58, 0.25);
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
 }
 
 .dashboard-title {
-  color: white;
   font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.dashboard-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
+  color: var(--text-primary);
   margin: 0;
 }
 
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card-large {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card-large::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #c41e3a 0%, #9a1629 100%);
-}
-
-.stat-card-large:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.stat-card-large.primary::before {
-  background: linear-gradient(90deg, #c41e3a 0%, #9a1629 100%);
-}
-
-.stat-card-large.success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-}
-
-.stat-card-large.success::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-large.warning {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
-}
-
-.stat-card-large.warning::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-large.info {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-}
-
-.stat-card-large.info::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-large.danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-}
-
-.stat-card-large.danger::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-content {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.stat-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  background: rgba(196, 30, 58, 0.1);
-  color: #c41e3a;
-  flex-shrink: 0;
-}
-
-.stat-card-large.success .stat-icon-wrapper,
-.stat-card-large.warning .stat-icon-wrapper,
-.stat-card-large.info .stat-icon-wrapper,
-.stat-card-large.danger .stat-icon-wrapper {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-}
-
-.stat-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  opacity: 0.8;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-value-large {
-  font-size: 2.25rem;
-  font-weight: 700;
-  line-height: 1.2;
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  white-space: nowrap;
-}
-
-.stat-value-large .currency {
-  font-size: 1.5rem;
-  font-weight: 600;
-  opacity: 0.9;
-}
-
-.stat-trend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  opacity: 0.8;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.stat-card-large.success .stat-trend,
-.stat-card-large.warning .stat-trend,
-.stat-card-large.info .stat-trend,
-.stat-card-large.danger .stat-trend {
-  border-top-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Content Sections */
-.content-section {
-  background: white;
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.section-header-modern {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2c1810;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.section-description {
-  color: #6c757d;
-  font-size: 0.95rem;
-  margin: 0;
-}
-
-/* History Grid */
-.history-grid-modern {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-}
-
-.history-card-modern {
-  background: #f9fafb;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
-}
-
-.history-card-modern.clickable {
-  cursor: pointer;
-}
-
-.history-card-modern.clickable:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-color: #c41e3a;
-}
-
-.card-header-modern {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.card-icon {
-  width: 48px;
-  height: 48px;
+/* History Overview Section */
+.history-overview-section {
+  background: var(--bg-card);
   border-radius: 12px;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+}
+
+.history-header-block {
+  margin-bottom: 0;
+}
+
+.history-title-block {
+  margin-bottom: 0.75rem;
+}
+
+.history-title {
   font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.card-action-icon {
-  color: #c41e3a;
-  font-size: 1.25rem;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
-}
-
-.history-card-modern.clickable:hover .card-action-icon {
-  opacity: 1;
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2c1810;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 0 0 0.25rem 0;
 }
 
-.card-date {
-  font-size: 0.875rem;
-  color: #6c757d;
+.history-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
-.history-stats-modern {
+.history-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.kpi-item {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: transparent;
 }
 
-.history-stat-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
-}
-
-.history-stat-item:hover {
-  border-color: #c41e3a;
-  transform: translateX(4px);
-}
-
-.history-stat-item.primary {
-  border-left: 4px solid #c41e3a;
-}
-
-.history-stat-item.success {
-  border-left: 4px solid #10b981;
-}
-
-.history-stat-item.warning {
-  border-left: 4px solid #f59e0b;
-}
-
-.history-stat-item.total {
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  border: 2px solid #c41e3a;
-  font-weight: 700;
-}
-
-.history-stat-item.total.success {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  border-color: #10b981;
-}
-
-.history-stat-item.total.danger {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border-color: #ef4444;
-}
-
-.stat-icon-small {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #f3f4f6;
-  color: #6c757d;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.history-stat-item.primary .stat-icon-small {
-  background: rgba(196, 30, 58, 0.1);
+.kpi-red .kpi-value {
   color: #c41e3a;
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
-.history-stat-item.success .stat-icon-small {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+.kpi-green .kpi-value {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
-.history-stat-item.warning .stat-icon-small {
-  background: rgba(245, 158, 11, 0.1);
+.kpi-orange .kpi-value {
   color: #f59e0b;
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
-.stat-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-label-small {
-  font-size: 0.75rem;
-  color: #6c757d;
+.kpi-label {
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 0.25rem;
+  color: var(--text-secondary);
 }
 
-.stat-value-small {
-  font-size: 1.25rem;
+.kpi-value {
+  font-size: 1.125rem;
   font-weight: 700;
-  color: #2c1810;
+}
+
+/* Main Content with Sidebar */
+.history-main-content {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+
+.left-column {
   display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  white-space: nowrap;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.stat-value-small.primary {
-  color: #c41e3a;
+/* Filters Sidebar */
+.filters-sidebar {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  height: fit-content;
 }
 
-.stat-value-small.success {
-  color: #10b981;
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
 }
 
-.stat-value-small.warning {
-  color: #f59e0b;
-}
-
-.stat-value-small.total-value {
-  font-size: 1.5rem;
-}
-
-.stat-value-small.total-value.success {
-  color: #10b981;
-}
-
-.stat-value-small.total-value.danger {
-  color: #ef4444;
-}
-
-.currency-small {
+.filters-title {
   font-size: 1rem;
   font-weight: 600;
-  opacity: 0.8;
+  color: var(--text-primary);
+  margin: 0;
 }
 
-/* Loading & Empty States */
-.loading-container,
-.empty-container {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #6c757d;
-}
-
-.loading-container i,
-.empty-container i {
-  font-size: 3rem;
+.filters-toggle {
+  background: none;
+  border: none;
   color: #c41e3a;
-  margin-bottom: 1rem;
-  opacity: 0.5;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem;
+}
+
+.filters-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-wrapper i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem 0.625rem 2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #c41e3a;
+}
+
+.filter-select {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #c41e3a;
+}
+
+.btn-reset-filters {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.625rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+}
+
+.btn-reset-filters:hover {
+  background: var(--bg-secondary);
+  border-color: #3a3d45;
+}
+
+/* Table Section */
+.table-section {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+}
+
+.loading-container {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f4f6;
+  border: 4px solid #2a2d35;
   border-top-color: #c41e3a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -877,55 +764,186 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-
-  .history-grid-modern {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@media (max-width: 768px) {
-  .dashboard-header {
-    padding: 1.5rem;
-  }
-
-  .dashboard-title {
-    font-size: 1.5rem;
-  }
-
-  .content-section {
-    padding: 1.5rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .history-grid-modern {
-    grid-template-columns: 1fr;
-  }
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
 }
 
-@media (max-width: 480px) {
-  .dashboard-header {
-    padding: 1.25rem;
-  }
+.empty-icon {
+  font-size: 3rem;
+  color: #c41e3a;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
 
-  .content-section {
-    padding: 1.25rem;
-  }
+.empty-state h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
 
-  .section-header-modern {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.empty-state p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+.history-table thead {
+  background: var(--bg-secondary);
+}
+
+.history-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.history-table th:first-child {
+  padding-left: 1rem;
+}
+
+.history-table th:last-child {
+  text-align: center;
+  padding-right: 1rem;
+}
+
+.history-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  vertical-align: middle;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.history-table td:first-child {
+  padding-left: 1rem;
+}
+
+.history-table td:last-child {
+  text-align: center;
+  padding-right: 1rem;
+}
+
+.history-table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+.date-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.date-cell span {
+  line-height: 1.5;
+}
+
+.date-cell i {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.sales-count-cell,
+.amount-cell,
+.commission-cell,
+.bonus-cell {
+  white-space: nowrap;
+}
+
+.benefits-cell.benefits-success {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.benefits-cell.benefits-danger {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.btn-icon {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.btn-icon:hover {
+  background: var(--bg-card);
+  border-color: #c41e3a;
+}
+
+.btn-icon-danger {
+  color: #ff6b7a;
+}
+
+.btn-icon-danger:hover {
+  background: rgba(196, 30, 58, 0.2);
+  border-color: #ff6b7a;
+  color: #ff8a95;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+}
+
+.btn-icon-restore {
+  color: #3b82f6;
+}
+
+.btn-icon-restore:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #60a5fa;
+}
+
+.btn-icon:hover {
+  background: var(--bg-secondary);
+  border-color: #c41e3a;
+  color: #c41e3a;
 }
 
 /* Modal Styles */
@@ -935,92 +953,82 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
   padding: 1rem;
-  animation: fadeIn 0.2s ease;
 }
 
 .history-details-modal {
-  background: white;
-  border-radius: 20px;
+  background: var(--bg-card);
+  border-radius: 12px;
   width: 100%;
-  max-width: 1000px;
+  max-width: 900px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.modal-header {
+.modal-header-dark {
+  padding: 1.5rem 2rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 2rem;
-  border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  border-radius: 20px 20px 0 0;
+  gap: 1.5rem;
 }
 
 .modal-title {
-  color: white;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
 }
 
 .modal-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.95rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-.modal-close {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+.modal-close-dark {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   flex-shrink: 0;
 }
 
-.modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(90deg);
+.modal-close-dark:hover {
+  background: #3a3d45;
+  border-color: #c41e3a;
+  color: #c41e3a;
 }
 
-.modal-body {
+.modal-body-dark {
   padding: 2rem;
   overflow-y: auto;
   flex: 1;
+  background: var(--bg-card);
 }
 
 .empty-sales-message {
   text-align: center;
   padding: 3rem 2rem;
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 .empty-sales-message i {
@@ -1037,122 +1045,96 @@ onMounted(() => {
 }
 
 .history-employee-card {
-  background: #f9fafb;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
-}
-
-.history-employee-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #c41e3a;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 1.25rem;
+  border: 1px solid var(--border-color);
 }
 
 .employee-card-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .employee-card-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  color: white;
+  width: 40px;
+  height: 40px;
+  background: #c41e3a;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.employee-card-info {
-  flex: 1;
-  min-width: 0;
+  color: white;
+  font-size: 1.125rem;
 }
 
 .employee-card-name {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2c1810;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 0 0 0.25rem 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .employee-card-meta {
-  font-size: 0.875rem;
-  color: #6c757d;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
 }
 
 .employee-card-metrics {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .metric-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
 }
 
 .metric-label {
-  font-size: 0.875rem;
-  color: #6c757d;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
 }
 
 .metric-value {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #2c1810;
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  white-space: nowrap;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .metric-value.success {
-  color: #10b981;
+  color: #16a34a;
 }
 
 .metric-value.warning {
   color: #f59e0b;
 }
 
-.metric-value .currency {
+.currency {
+  margin-left: 0.25rem;
   font-size: 0.875rem;
-  font-weight: 600;
-  opacity: 0.8;
 }
 
 .employee-sales-list {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #2a2d35;
 }
 
 .sales-list-header {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .sales-list-header h4 {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #2c1810;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -1168,43 +1150,33 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0.75rem;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  font-size: 0.875rem;
+  padding: 0.5rem;
+  background: var(--bg-card);
+  border-radius: 4px;
+  font-size: 0.8125rem;
 }
 
 .mini-sale-date {
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 .mini-sale-amount {
-  font-weight: 700;
-  color: #2c1810;
-  white-space: nowrap;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
-@media (max-width: 768px) {
-  .history-details-modal {
-    max-width: 100%;
-    max-height: 95vh;
-  }
-
-  .modal-header {
-    padding: 1.5rem;
-  }
-
-  .modal-title {
-    font-size: 1.5rem;
-  }
-
-  .modal-body {
-    padding: 1.5rem;
-  }
-
-  .history-employees-grid {
+/* Responsive */
+@media (max-width: 1200px) {
+  .history-main-content {
     grid-template-columns: 1fr;
+  }
+
+  .left-column {
+    order: 2;
+  }
+
+  .table-section {
+    order: 1;
   }
 }
 </style>

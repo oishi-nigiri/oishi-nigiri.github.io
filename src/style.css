@@ -1,4 +1,4 @@
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
 
 * {
   margin: 0;
@@ -15,10 +15,28 @@
   --color-dark: #1a1a1a;
   --color-text: #333;
   --color-text-light: #666;
-  --font-japanese: 'Noto Sans JP', sans-serif;
-  --font-serif: 'Playfair Display', serif;
+  --font-japanese: "Noto Sans JP", sans-serif;
+  --font-serif: "Playfair Display", serif;
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+
+  /* Admin Dark Mode Variables */
+  --bg-main: #0f1115;
+  --bg-secondary: #14161c;
+  --bg-card: #1b1e26;
+  --bg-card-hover: #20232b;
+  --border-color: rgba(64, 64, 64, 0.3);
+  --accent-red: #c41e3a;
+  --accent-red-hover: #a01830;
+  --positive-green: #28a745;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #808080;
+  --text-disabled: #555555;
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --border-radius: 8px;
+  --border-radius-large: 12px;
 }
 
 html {
@@ -108,4 +126,3 @@ button {
     font-size: 1.5rem !important;
   }
 }
-

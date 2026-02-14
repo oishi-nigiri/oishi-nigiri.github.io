@@ -60,6 +60,19 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+
+    match /login_events/{eventId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /reservations/{resId} {
+      allow read, write: if true;
+    }
+
+    match /availability/{date} {
+      allow read, write: if true;
+    }
   }
 }
 

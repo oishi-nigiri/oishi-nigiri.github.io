@@ -5,22 +5,24 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build-isolated": "node scripts/build-isolated.js",
+    "build": "vite build && node scripts/copy-assets.js",
     "preview": "vite preview",
     "deploy": "node deploy.js",
-    "validate-backup": "node scripts/validate-backup.js",
-    "import-backup": "node scripts/import-backup.js",
-    "prepare-client-data": "node scripts/prepare-client-data.js"
+    "deploy-gh-pages": "node deploy-gh-pages.js"
   },
   "dependencies": {
-    "firebase": "^10.7.1",
+    "@neondatabase/serverless": "^1.0.2",
+    "@supabase/supabase-js": "^2.90.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "firebase": "^10.14.1",
+    "pg": "^8.16.3",
     "vue": "^3.3.0",
     "vue-router": "^4.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.4.0",
-    "firebase-admin": "^13.6.0",
     "vite": "^4.4.0"
   }
 }

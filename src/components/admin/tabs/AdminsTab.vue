@@ -1,168 +1,203 @@
 <template>
   <div class="admins-dashboard">
-    <!-- Header avec actions rapides -->
+    <!-- Header -->
     <div class="dashboard-header">
-      <div class="header-content">
-        <div>
-          <h1 class="dashboard-title">Gestion des Administrateurs</h1>
-          <p class="dashboard-subtitle">Gérez les administrateurs et leurs permissions</p>
+      <h1 class="dashboard-title">Gestion des Administrateurs</h1>
+    </div>
+
+    <!-- Section Stats et Actions -->
+    <div class="admins-overview-section">
+      <div class="admins-header-block">
+        <div class="admins-title-block">
+          <h2 class="admins-title">Administrateurs</h2>
+          <p class="admins-subtitle">{{ admins.length }} administrateur(s) enregistré(s)</p>
         </div>
-        <div class="header-actions">
-          <button v-if="canManageAdmins" @click="openAdminModal()" class="btn-action btn-primary-action">
-            <i class="fas fa-plus-circle"></i>
-            <span>Nouvel Admin</span>
-          </button>
+        <div class="admins-kpis">
+          <div class="kpi-item kpi-red">
+            <span class="kpi-label">TOTAL</span>
+            <span class="kpi-value">{{ admins.length }}</span>
+          </div>
+          <div class="kpi-item kpi-green">
+            <span class="kpi-label">PERMISSIONS</span>
+            <span class="kpi-value">{{ totalPermissions }}</span>
+          </div>
+          <div class="kpi-item kpi-green">
+            <span class="kpi-label">SUPER ADMINS</span>
+            <span class="kpi-value">{{ superAdminCount }}</span>
+          </div>
+          <div class="kpi-item kpi-orange">
+            <span class="kpi-label">ACTIFS</span>
+            <span class="kpi-value">{{ admins.length }}</span>
+          </div>
         </div>
+      </div>
+
+      <div class="admins-actions">
+        <button
+          v-if="canManageAdmins"
+          @click="openAdminModal()"
+          class="btn-primary-admins"
+        >
+          <i class="fas fa-plus"></i>
+          <span>Nouvel Admin</span>
+        </button>
       </div>
     </div>
 
-    <!-- Statistiques principales -->
-    <div class="stats-grid">
-      <div class="stat-card-large primary">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-user-shield"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Total Admins</div>
-            <div class="stat-value-large">
-              <span>{{ admins.length }}</span>
-            </div>
-          </div>
+    <!-- Main Content with Sidebar -->
+    <div v-if="!canManageAdmins" class="permission-denied">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-lock"></i>
         </div>
-        <div class="stat-trend">
-          <i class="fas fa-users"></i>
-          <span>Enregistrés</span>
-        </div>
-      </div>
-
-      <div class="stat-card-large success">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-key"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Permissions Actives</div>
-            <div class="stat-value-large">
-              <span>{{ totalPermissions }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-check-circle"></i>
-          <span>Au total</span>
-        </div>
-      </div>
-
-      <div class="stat-card-large info">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-crown"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Super Admins</div>
-            <div class="stat-value-large">
-              <span>{{ superAdminCount }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-star"></i>
-          <span>Accès complet</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Liste des Administrateurs -->
-    <div class="content-section">
-      <div class="section-header-modern">
-        <div>
-          <h2 class="section-title">Administrateurs</h2>
-          <p class="section-description">Gérez les administrateurs et leurs permissions</p>
-        </div>
-        <div class="section-actions">
-          <button v-if="canManageAdmins" @click="openAdminModal()" class="btn-icon-text">
-            <i class="fas fa-plus"></i>
-            <span>Ajouter</span>
-          </button>
-        </div>
-      </div>
-
-      <div v-if="!canManageAdmins" class="empty-container">
-        <i class="fas fa-lock"></i>
+        <h3>Accès refusé</h3>
         <p>Vous n'avez pas les permissions pour gérer les administrateurs.</p>
       </div>
-      <div v-else-if="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Chargement des données...</p>
-      </div>
-      <div v-else-if="admins.length === 0" class="empty-container">
-        <i class="fas fa-user-shield"></i>
-        <p>Aucun administrateur enregistré</p>
-      </div>
-      <div v-else class="admins-grid">
-        <div v-for="admin in admins" :key="admin.id" class="admin-card-modern">
-          <div class="card-header-modern">
-            <div class="card-icon">
-              <i class="fas fa-user-shield"></i>
-            </div>
-            <div class="card-info">
-              <h3 class="card-title">{{ admin.username || admin.discordId || 'Admin' }}</h3>
-              <div class="card-meta">
-                <i class="fab fa-discord"></i>
-                <span>{{ admin.discordId }}</span>
+    </div>
+
+    <div v-else class="admins-main-content">
+      <!-- Left Column: Filters -->
+      <div class="left-column">
+        <!-- Filters Sidebar -->
+        <div class="filters-sidebar">
+          <div class="filters-header">
+            <h3 class="filters-title">Filtres</h3>
+            <button
+              @click="filtersExpanded = !filtersExpanded"
+              class="filters-toggle"
+            >
+              <i :class="filtersExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+            </button>
+          </div>
+
+          <div v-show="filtersExpanded" class="filters-content">
+            <div class="filter-group">
+              <label class="filter-label">Recherche</label>
+              <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Rechercher..."
+                  class="search-input"
+                />
               </div>
             </div>
-          </div>
-          <div class="permissions-section-modern">
-            <div class="permissions-label">
-              <i class="fas fa-key"></i>
-              Permissions
+
+            <div class="filter-group">
+              <label class="filter-label">Tri par</label>
+              <select v-model="sortBy" class="filter-select">
+                <option value="email-asc">Email (A-Z)</option>
+                <option value="email-desc">Email (Z-A)</option>
+                <option value="username-asc">Nom d'utilisateur (A-Z)</option>
+              </select>
             </div>
-            <div class="permissions-grid-modern">
-              <span v-if="(admin.permissions || {}).menu" class="permission-badge">
-                <i class="fas fa-utensils"></i> Carte
-              </span>
-              <span v-if="(admin.permissions || {}).team" class="permission-badge">
-                <i class="fas fa-users"></i> Équipe
-              </span>
-              <span v-if="(admin.permissions || {}).sales" class="permission-badge">
-                <i class="fas fa-chart-line"></i> Ventes
-              </span>
-              <span v-if="(admin.permissions || {}).history" class="permission-badge">
-                <i class="fas fa-clock"></i> Historique
-              </span>
-              <span v-if="(admin.permissions || {}).resetSales" class="permission-badge">
-                <i class="fas fa-redo"></i> Réinit. Ventes
-              </span>
-              <span v-if="(admin.permissions || {}).bonuses" class="permission-badge">
-                <i class="fas fa-gift"></i> Primes
-              </span>
-              <span v-if="(admin.permissions || {}).employees" class="permission-badge">
-                <i class="fas fa-user-tie"></i> Employés
-              </span>
-              <span v-if="(admin.permissions || {}).ranks" class="permission-badge">
-                <i class="fas fa-star"></i> Grades
-              </span>
-              <span v-if="(admin.permissions || {}).admins" class="permission-badge success">
-                <i class="fas fa-crown"></i> Admins
-              </span>
-            </div>
-          </div>
-          <div class="card-actions-modern">
-            <button @click="openAdminModal(admin)" class="btn-card-action">
-              <i class="fas fa-edit"></i>
-              <span>Modifier</span>
-            </button>
-            <button @click="deleteAdmin(admin.id)" class="btn-card-action danger">
-              <i class="fas fa-trash"></i>
-              <span>Supprimer</span>
+
+            <button @click="resetFilters" class="btn-reset-filters">
+              <i class="fas fa-times"></i>
+              <span>Réinitialiser</span>
             </button>
           </div>
         </div>
       </div>
+
+      <!-- Table Section -->
+      <div class="table-section">
+        <div v-if="loading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Chargement des données...</p>
+        </div>
+
+        <div v-else-if="filteredAdmins.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <h3>
+            {{ admins.length === 0 ? "Aucun administrateur enregistré" : "Aucun résultat" }}
+          </h3>
+          <p>
+            {{
+              admins.length === 0
+                ? "Commencez par ajouter votre premier administrateur"
+                : "Aucun administrateur ne correspond à vos critères"
+            }}
+          </p>
+          <button
+            v-if="admins.length === 0"
+            @click="openAdminModal()"
+            class="btn-primary-admins"
+          >
+            <i class="fas fa-plus"></i>
+            <span>Ajouter un Administrateur</span>
+          </button>
+        </div>
+
+        <div v-else class="table-wrapper">
+          <table class="admins-table">
+            <thead>
+              <tr>
+                <th>EMAIL</th>
+                <th>NOM D'UTILISATEUR</th>
+                <th>PERMISSIONS</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="admin in filteredAdmins" :key="admin.id">
+                <td class="email-cell">
+                  <i class="fas fa-envelope"></i>
+                  <span>{{ admin.email }}</span>
+                </td>
+                <td class="username-cell">
+                  <span v-if="admin.username" class="username-text">{{ admin.username }}</span>
+                  <span v-else class="username-empty">Non défini</span>
+                </td>
+                <td class="permissions-cell">
+                  <div class="permissions-badges">
+                    <span
+                      v-if="hasAllPermissions(admin)"
+                      class="permission-badge permission-super"
+                    >
+                      <i class="fas fa-crown"></i>
+                      Super Admin
+                    </span>
+                    <template v-else>
+                      <span
+                        v-for="perm in getActivePermissions(admin)"
+                        :key="perm"
+                        class="permission-badge"
+                      >
+                        {{ getPermissionLabel(perm) }}
+                      </span>
+                      <span v-if="getActivePermissions(admin).length === 0" class="permission-empty">
+                        Aucune permission
+                      </span>
+                    </template>
+                  </div>
+                </td>
+                <td class="actions-cell">
+                  <button
+                    @click="openAdminModal(admin)"
+                    class="btn-icon"
+                    title="Modifier"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    @click="deleteAdmin(admin.id)"
+                    class="btn-icon btn-icon-danger"
+                    title="Supprimer"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    
+
     <AdminModal
       v-if="showAdminModal && canManageAdmins"
       :admin="editingAdmin"
@@ -173,576 +208,505 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useFirestore } from '../../../composables/useFirestore'
-import { useConfirm } from '../../../composables/useConfirm'
-import { getDb } from '../../../composables/useFirebase'
-import { collection, onSnapshot } from 'firebase/firestore'
-import AdminModal from '../modals/AdminModal.vue'
+import { ref, computed, onMounted } from "vue";
+import { useFirestore } from "../../../composables/useFirestore";
+import { useConfirm } from "../../../composables/useConfirm";
+import { useAuth } from "../../../composables/useAuth";
+import { getDb } from "../../../composables/useFirebase";
+import {
+  collection,
+  onSnapshot,
+  doc,
+  setDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import AdminModal from "../modals/AdminModal.vue";
 
-const { getAll, create, update, remove } = useFirestore()
+const { getAll, create, update, remove } = useFirestore();
+const { isSuperAdmin, permissions } = useAuth();
 
-const admins = ref([])
-const loading = ref(true)
-const showAdminModal = ref(false)
-const editingAdmin = ref(null)
-const { confirm, alert } = useConfirm()
+const admins = ref([]);
+const loading = ref(true);
+const showAdminModal = ref(false);
+const editingAdmin = ref(null);
+const { confirm, alert } = useConfirm();
 
-const isSuperAdmin = computed(() => {
-  return localStorage.getItem('isSuperAdmin') === 'true'
-})
-
-const currentPermissions = computed(() => {
-  return JSON.parse(localStorage.getItem('adminPermissions') || '{}')
-})
+// Filters
+const searchQuery = ref("");
+const sortBy = ref("email-asc");
+const filtersExpanded = ref(true);
 
 const canManageAdmins = computed(() => {
-  return isSuperAdmin.value || currentPermissions.value.admins === true
-})
+  return isSuperAdmin.value || permissions.value.admins === true;
+});
 
 const totalPermissions = computed(() => {
   return admins.value.reduce((total, admin) => {
-    const perms = admin.permissions || {}
-    return total + Object.values(perms).filter(Boolean).length
-  }, 0)
-})
+    const perms = admin.permissions || {};
+    return total + Object.values(perms).filter(Boolean).length;
+  }, 0);
+});
 
 const superAdminCount = computed(() => {
-  // Compter les super admins (ceux qui ont toutes les permissions ou sont dans ADMIN_IDS)
-  return admins.value.filter(admin => {
-    const perms = admin.permissions || {}
-    const hasAllPerms = Object.values(perms).every(v => v === true)
-    return hasAllPerms
-  }).length
-})
+  return admins.value.filter((admin) => {
+    const perms = admin.permissions || {};
+    return Object.values(perms).every((v) => v === true);
+  }).length;
+});
+
+const hasAllPermissions = (admin) => {
+  const perms = admin.permissions || {};
+  const values = Object.values(perms);
+  return values.length > 0 && values.every((v) => v === true);
+};
+
+const getActivePermissions = (admin) => {
+  const perms = admin.permissions || {};
+  return Object.keys(perms).filter((key) => perms[key] === true);
+};
+
+const getPermissionLabel = (key) => {
+  const labels = {
+    menu: "Carte",
+    team: "Équipe",
+    sales: "Ventes",
+    history: "Historique",
+    employees: "Employés",
+    ranks: "Grades",
+    admins: "Admins",
+    bonuses: "Primes",
+    resetSales: "Réinit. Ventes",
+  };
+  return labels[key] || key;
+};
+
+const filteredAdmins = computed(() => {
+  let filtered = [...admins.value];
+
+  // Search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(
+      (admin) =>
+        admin.email.toLowerCase().includes(query) ||
+        (admin.username && admin.username.toLowerCase().includes(query))
+    );
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    switch (sortBy.value) {
+      case "email-asc":
+        return a.email.localeCompare(b.email);
+      case "email-desc":
+        return b.email.localeCompare(a.email);
+      case "username-asc":
+        const usernameA = a.username || "";
+        const usernameB = b.username || "";
+        return usernameA.localeCompare(usernameB);
+      default:
+        return 0;
+    }
+  });
+
+  return filtered;
+});
+
+const resetFilters = () => {
+  searchQuery.value = "";
+  sortBy.value = "email-asc";
+};
 
 const loadData = async () => {
   try {
-    loading.value = true
-    admins.value = await getAll('admins')
-    loading.value = false
+    loading.value = true;
+    admins.value = await getAll("admins");
+    loading.value = false;
   } catch (error) {
-    console.error('Erreur lors du chargement:', error)
-    loading.value = false
+    console.error("Erreur lors du chargement:", error);
+    loading.value = false;
   }
-}
+};
 
-const openAdminModal = async (admin = null) => {
+const openAdminModal = async (admin = null, prefillEmail = null) => {
   if (!canManageAdmins.value) {
-    await alert('Vous n\'avez pas la permission de gérer les administrateurs.', { type: 'warning' })
-    return
+    await alert("Vous n'avez pas la permission de gérer les administrateurs.", {
+      type: "warning",
+    });
+    return;
   }
-  editingAdmin.value = admin
-  showAdminModal.value = true
-}
+
+  if (prefillEmail) {
+    editingAdmin.value = {
+      email: prefillEmail,
+      permissions: {
+        menu: false,
+        team: false,
+        sales: false,
+        employees: false,
+        ranks: false,
+        admins: false,
+      },
+    };
+  } else {
+    editingAdmin.value = admin;
+  }
+
+  showAdminModal.value = true;
+};
 
 const closeAdminModal = () => {
-  showAdminModal.value = false
-  editingAdmin.value = null
-}
+  showAdminModal.value = false;
+  editingAdmin.value = null;
+};
 
 const saveAdmin = async (adminData) => {
   try {
+    const db = getDb();
     const data = {
-      discordId: String(adminData.discordId),
+      email: adminData.email,
       username: adminData.username || null,
       isAdmin: true,
-      permissions: adminData.permissions
-    }
-    
-    if (editingAdmin.value) {
-      await update('admins', String(editingAdmin.value.id), data)
-    } else {
-      await create('admins', data)
-    }
-    
-    closeAdminModal()
-    loadData()
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde:', error)
+      permissions: adminData.permissions,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    // Si c'est une erreur "No document to update", cela signifie que l'admin a été supprimé (import)
-    if (error.message.includes('No document to update') && editingAdmin.value) {
-      const confirmRecreate = await confirm(
-        'Admin introuvable',
-        'Cet administrateur semble avoir été supprimé lors d\'un import. Voulez-vous le recréer ?'
-      )
-
-      if (confirmRecreate) {
-        try {
-          // Recréer l'admin avec les données du formulaire
-          const adminData = {
-            isAdmin: form.value.isAdmin,
-            username: form.value.username,
-            discordId: form.value.discordId,
-            permissions: { ...form.value.permissions }
-          }
-          await create('admins', adminData)
-          closeAdminModal()
-          loadData()
-          await alert('Administrateur recréé avec succès', { type: 'success' })
-          return
-        } catch (createError) {
-          console.error('Erreur lors de la recréation:', createError)
-          await alert('Erreur lors de la recréation de l\'administrateur', { type: 'danger' })
-          return
-        }
+    if (editingAdmin.value && editingAdmin.value.id) {
+      if (
+        adminData.email.toLowerCase() !== editingAdmin.value.id.toLowerCase()
+      ) {
+        await deleteDoc(doc(db, "admins", editingAdmin.value.id));
+        await setDoc(doc(db, "admins", adminData.email.toLowerCase()), data);
+      } else {
+        await update("admins", editingAdmin.value.id, data);
       }
+    } else {
+      await setDoc(doc(db, "admins", adminData.email.toLowerCase()), data);
     }
 
-    await alert('Erreur lors de la sauvegarde', { type: 'danger' })
+    closeAdminModal();
+    loadData();
+  } catch (error) {
+    console.error("Erreur lors de la sauvegarde:", error);
+    await alert("Erreur lors de la sauvegarde", { type: "danger" });
   }
-}
+};
 
 const deleteAdmin = async (id) => {
   if (!canManageAdmins.value) {
-    await alert('Vous n\'avez pas la permission de supprimer des administrateurs.', { type: 'warning' })
-    return
+    await alert(
+      "Vous n'avez pas la permission de supprimer des administrateurs.",
+      { type: "warning" }
+    );
+    return;
   }
-  
-  const result = await confirm('Êtes-vous sûr de vouloir supprimer cet administrateur ?', {
-    type: 'danger',
-    title: 'Supprimer un administrateur',
-    confirmText: 'Supprimer'
-  })
-  if (!result) return
-  
+
+  const result = await confirm(
+    "Êtes-vous sûr de vouloir supprimer cet administrateur ?",
+    {
+      type: "danger",
+      title: "Supprimer un administrateur",
+      confirmText: "Supprimer",
+    }
+  );
+  if (!result) return;
+
   try {
-    await remove('admins', id)
-    loadData()
+    await remove("admins", id);
+    loadData();
   } catch (error) {
-    console.error('Erreur lors de la suppression:', error)
-    await alert('Erreur lors de la suppression', { type: 'danger' })
+    console.error("Erreur lors de la suppression:", error);
+    await alert("Erreur lors de la suppression", { type: "danger" });
   }
-}
+};
 
 onMounted(() => {
-  loadData()
-  
-  const db = getDb()
-  onSnapshot(collection(db, 'admins'), () => loadData())
-})
+  loadData();
+
+  const db = getDb();
+  onSnapshot(collection(db, "admins"), () => loadData());
+});
 </script>
 
 <style scoped>
 .admins-dashboard {
-  animation: fadeIn 0.3s ease;
+  padding: 1rem 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Dashboard Header */
 .dashboard-header {
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 8px 24px rgba(196, 30, 58, 0.25);
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
 }
 
 .dashboard-title {
-  color: white;
   font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.dashboard-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
+  color: var(--text-primary);
   margin: 0;
 }
 
-.header-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.btn-action {
-  padding: 0.875rem 1.5rem;
-  border: none;
+/* Admins Overview Section */
+.admins-overview-section {
+  background: var(--bg-card);
   border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  font-family: 'Noto Sans JP', sans-serif;
-  white-space: nowrap;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
 }
 
-.btn-primary-action {
-  background: white;
-  color: #c41e3a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-primary-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card-large {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card-large::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #c41e3a 0%, #9a1629 100%);
-}
-
-.stat-card-large:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.stat-card-large.primary::before {
-  background: linear-gradient(90deg, #c41e3a 0%, #9a1629 100%);
-}
-
-.stat-card-large.success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-}
-
-.stat-card-large.success::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-large.info {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-}
-
-.stat-card-large.info::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-content {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
+.admins-header-block {
   margin-bottom: 1rem;
 }
 
-.stat-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  background: rgba(196, 30, 58, 0.1);
-  color: #c41e3a;
-  flex-shrink: 0;
+.admins-title-block {
+  margin-bottom: 0.75rem;
 }
 
-.stat-card-large.success .stat-icon-wrapper,
-.stat-card-large.info .stat-icon-wrapper {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+.admins-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
 }
 
-.stat-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  opacity: 0.8;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-value-large {
-  font-size: 2.25rem;
-  font-weight: 700;
-  line-height: 1.2;
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  white-space: nowrap;
-}
-
-.stat-trend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  opacity: 0.8;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.stat-card-large.success .stat-trend,
-.stat-card-large.info .stat-trend {
-  border-top-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Content Sections */
-.content-section {
-  background: white;
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.section-header-modern {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2c1810;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.section-description {
-  color: #6c757d;
-  font-size: 0.95rem;
+.admins-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-.section-actions {
+.admins-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.kpi-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.kpi-red .kpi-value {
+  color: #c41e3a;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-green .kpi-value {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-orange .kpi-value {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.kpi-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.admins-actions {
   display: flex;
   gap: 0.75rem;
 }
 
-.btn-icon-text {
-  padding: 0.65rem 1.25rem;
+.btn-primary-admins {
+  background: #c41e3a;
+  color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  background: #f3f4f6;
-  color: #6c757d;
+  gap: 0.375rem;
+  transition: all 0.2s;
 }
 
-.btn-icon-text:hover {
-  background: #e5e7eb;
+.btn-primary-admins:hover {
+  background: #a01a2e;
   transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(196, 30, 58, 0.3);
 }
 
-/* Admins Grid */
-.admins-grid {
+.permission-denied {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+}
+
+/* Main Content with Sidebar */
+.admins-main-content {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 
-.admin-card-modern {
-  background: #f9fafb;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
+/* Filters Sidebar */
+.filters-sidebar {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  height: fit-content;
 }
 
-.admin-card-modern:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.filters-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.filters-toggle {
+  background: none;
+  border: none;
+  color: #c41e3a;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem;
+}
+
+.filters-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-wrapper i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem 0.625rem 2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.search-input:focus {
+  outline: none;
   border-color: #c41e3a;
 }
 
-.card-header-modern {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+.filter-select {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
-.card-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-  color: white;
+.filter-select:focus {
+  outline: none;
+  border-color: #c41e3a;
+}
+
+.btn-reset-filters {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.625rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2c1810;
-  margin: 0 0 0.5rem 0;
-}
-
-.card-meta {
-  display: flex;
-  align-items: center;
   gap: 0.5rem;
-  color: #6c757d;
-  font-size: 0.875rem;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
 }
 
-.card-meta i {
-  color: #5865F2;
+.btn-reset-filters:hover {
+  background: var(--bg-secondary);
+  border-color: #3a3d45;
 }
 
-.permissions-section-modern {
-  margin: 1rem 0;
-  padding: 1rem;
-  background: white;
+/* Table Section */
+.table-section {
+  background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
 }
 
-.permissions-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  color: #2c1810;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-}
-
-.permissions-label i {
-  color: #c41e3a;
-}
-
-.permissions-grid-modern {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.permission-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.4rem 0.75rem;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  color: white;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.permission-badge.success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-}
-
-.card-actions-modern {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.btn-card-action {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  background: white;
-  color: #6c757d;
-  border: 1px solid #e5e7eb;
-}
-
-.btn-card-action:hover {
-  background: #f3f4f6;
-  transform: translateY(-1px);
-}
-
-.btn-card-action.danger {
-  background: #fee2e2;
-  color: #dc2626;
-  border-color: #fecaca;
-}
-
-.btn-card-action.danger:hover {
-  background: #fecaca;
-}
-
-/* Loading & Empty States */
-.loading-container,
-.empty-container {
+.loading-container {
   text-align: center;
-  padding: 4rem 2rem;
-  color: #6c757d;
-}
-
-.loading-container i,
-.empty-container i {
-  font-size: 3rem;
-  color: #c41e3a;
-  margin-bottom: 1rem;
-  opacity: 0.5;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f4f6;
+  border: 4px solid #2a2d35;
   border-top-color: #c41e3a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -750,67 +714,205 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: #c41e3a;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.admins-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+.admins-table thead {
+  background: var(--bg-secondary);
+}
+
+.admins-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admins-table th:first-child {
+  padding-left: 1rem;
+}
+
+.admins-table th:last-child {
+  text-align: center;
+  padding-right: 1rem;
+}
+
+.admins-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  vertical-align: middle;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.admins-table td:first-child {
+  padding-left: 1rem;
+}
+
+.admins-table td:last-child {
+  text-align: center;
+  padding-right: 1rem;
+}
+
+.admins-table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+.email-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.email-cell i {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.username-cell {
+  white-space: nowrap;
+}
+
+.username-text {
+  color: var(--text-primary);
+}
+
+.username-empty {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.permissions-cell {
+  max-width: 400px;
+}
+
+.permissions-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.permission-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+}
+
+.permission-badge.permission-super {
+  background: #f59e0b;
+  color: var(--text-primary);
+  border-color: #f59e0b;
+}
+
+.permission-badge i {
+  font-size: 0.6875rem;
+}
+
+.permission-empty {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 0.8125rem;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+}
+
+.btn-icon:hover {
+  background: var(--bg-secondary);
+  border-color: #c41e3a;
+  color: #c41e3a;
+}
+
+.btn-icon-danger:hover {
+  border-color: #dc2626;
+  color: #dc2626;
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-
-  .admins-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-header {
-    padding: 1.5rem;
-  }
-
-  .dashboard-title {
-    font-size: 1.5rem;
-  }
-
-  .content-section {
-    padding: 1.5rem;
-  }
-
-  .stats-grid {
+@media (max-width: 1200px) {
+  .admins-main-content {
     grid-template-columns: 1fr;
   }
 
-  .admins-grid {
-    grid-template-columns: 1fr;
+  .left-column {
+    order: 2;
   }
 
-  .header-actions {
-    width: 100%;
-  }
-
-  .header-actions .btn-action {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .permissions-grid-modern {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-header {
-    padding: 1.25rem;
-  }
-
-  .content-section {
-    padding: 1.25rem;
-  }
-
-  .section-header-modern {
-    flex-direction: column;
-    align-items: flex-start;
+  .table-section {
+    order: 1;
   }
 }
 </style>

@@ -1,133 +1,194 @@
 <template>
   <div class="employees-dashboard">
-    <!-- Header avec actions rapides -->
+    <!-- Header -->
     <div class="dashboard-header">
-      <div class="header-content">
-        <div>
-          <h1 class="dashboard-title">Gestion des Employés</h1>
-          <p class="dashboard-subtitle">Gérez les employés et leurs grades</p>
+      <h1 class="dashboard-title">Gestion des Employés</h1>
+    </div>
+
+    <!-- Section Stats et Actions -->
+    <div class="employees-overview-section">
+      <div class="employees-header-block">
+        <div class="employees-title-block">
+          <h2 class="employees-title">Employés</h2>
+          <p class="employees-subtitle">{{ employees.length }} employé(s) enregistré(s)</p>
         </div>
-        <div class="header-actions">
-          <button @click="openEmployeeModal()" class="btn-action btn-primary-action">
-            <i class="fas fa-plus-circle"></i>
-            <span>Nouvel Employé</span>
-          </button>
+        <div class="employees-kpis">
+          <div class="kpi-item kpi-red">
+            <span class="kpi-label">TOTAL</span>
+            <span class="kpi-value">{{ employees.length }}</span>
+          </div>
+          <div class="kpi-item kpi-green">
+            <span class="kpi-label">GRADES</span>
+            <span class="kpi-value">{{ uniqueRanks }}</span>
+          </div>
+          <div class="kpi-item kpi-green">
+            <span class="kpi-label">EMAIL</span>
+            <span class="kpi-value">{{ employeesWithEmail }}</span>
+          </div>
+          <div class="kpi-item kpi-orange">
+            <span class="kpi-label">POURCENTAGE</span>
+            <span class="kpi-value">{{ emailPercentage }}%</span>
+          </div>
         </div>
+      </div>
+
+      <div class="employees-actions">
+        <button @click="openEmployeeModal()" class="btn-primary-employees">
+          <i class="fas fa-plus"></i>
+          <span>Nouvel Employé</span>
+        </button>
       </div>
     </div>
 
-    <!-- Statistiques principales -->
-    <div class="stats-grid">
-      <div class="stat-card-large primary">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-user-tie"></i>
+    <!-- Main Content with Sidebar -->
+    <div class="employees-main-content">
+      <!-- Left Column: Filters -->
+      <div class="left-column">
+        <!-- Filters Sidebar -->
+        <div class="filters-sidebar">
+          <div class="filters-header">
+            <h3 class="filters-title">Filtres</h3>
+            <button
+              @click="filtersExpanded = !filtersExpanded"
+              class="filters-toggle"
+            >
+              <i :class="filtersExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+            </button>
           </div>
-          <div class="stat-info">
-            <div class="stat-label">Total Employés</div>
-            <div class="stat-value-large">
-              <span>{{ employees.length }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-users"></i>
-          <span>Enregistrés</span>
-        </div>
-      </div>
 
-      <div class="stat-card-large success">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-star"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Grades Uniques</div>
-            <div class="stat-value-large">
-              <span>{{ uniqueRanks }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-tags"></i>
-          <span>Différents grades</span>
-        </div>
-      </div>
-
-      <div class="stat-card-large info">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-id-card"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Avec Discord ID</div>
-            <div class="stat-value-large">
-              <span>{{ employeesWithDiscord }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-percentage"></i>
-          <span>{{ discordPercentage }}% liés</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Liste des Employés -->
-    <div class="content-section">
-      <div class="section-header-modern">
-        <div>
-          <h2 class="section-title">Liste des Employés</h2>
-          <p class="section-description">Gérez les employés et leurs informations</p>
-        </div>
-        <div class="section-actions">
-          <button @click="openEmployeeModal()" class="btn-icon-text">
-            <i class="fas fa-plus"></i>
-            <span>Ajouter</span>
-          </button>
-        </div>
-      </div>
-
-      <div v-if="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Chargement des données...</p>
-      </div>
-      <div v-else-if="employees.length === 0" class="empty-container">
-        <i class="fas fa-user-tie"></i>
-        <p>Aucun employé enregistré. Ajoutez-en un pour commencer !</p>
-      </div>
-      <div v-else class="employees-grid">
-        <div v-for="employee in employees" :key="employee.id" class="employee-card-modern">
-          <div class="card-header-modern">
-            <div class="card-icon">
-              <i class="fas fa-user-tie"></i>
-            </div>
-            <div class="card-info">
-              <h3 class="card-title">{{ employee.name }}</h3>
-              <div class="card-badge">
-                <i class="fas fa-star"></i>
-                {{ getRankName(employee.rankId) }}
+          <div v-show="filtersExpanded" class="filters-content">
+            <div class="filter-group">
+              <label class="filter-label">Recherche</label>
+              <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Rechercher..."
+                  class="search-input"
+                />
               </div>
             </div>
-          </div>
-          <div v-if="employee.discordId" class="card-meta">
-            <i class="fab fa-discord"></i>
-            <span>Discord ID: {{ employee.discordId }}</span>
-          </div>
-          <div class="card-actions-modern">
-            <button @click="openEmployeeModal(employee)" class="btn-card-action">
-              <i class="fas fa-edit"></i>
-              <span>Modifier</span>
-            </button>
-            <button @click="deleteEmployee(employee.id)" class="btn-card-action danger">
-              <i class="fas fa-trash"></i>
-              <span>Supprimer</span>
+
+            <div class="filter-group">
+              <label class="filter-label">Grade</label>
+              <select v-model="rankFilter" class="filter-select">
+                <option value="">Tous les grades</option>
+                <option v-for="rank in ranks" :key="rank.id" :value="rank.id">
+                  {{ rank.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Email</label>
+              <select v-model="emailFilter" class="filter-select">
+                <option value="">Tous</option>
+                <option value="with">Avec Email</option>
+                <option value="without">Sans Email</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Tri par</label>
+              <select v-model="sortBy" class="filter-select">
+                <option value="name-asc">Nom (A-Z)</option>
+                <option value="name-desc">Nom (Z-A)</option>
+                <option value="rank-asc">Grade (A-Z)</option>
+              </select>
+            </div>
+
+            <button @click="resetFilters" class="btn-reset-filters">
+              <i class="fas fa-times"></i>
+              <span>Réinitialiser</span>
             </button>
           </div>
         </div>
       </div>
+
+      <!-- Table Section -->
+      <div class="table-section">
+        <div v-if="loading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Chargement des données...</p>
+        </div>
+
+        <div v-else-if="filteredEmployees.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-user-tie"></i>
+          </div>
+          <h3>
+            {{ employees.length === 0 ? "Aucun employé enregistré" : "Aucun résultat" }}
+          </h3>
+          <p>
+            {{
+              employees.length === 0
+                ? "Commencez par ajouter votre premier employé"
+                : "Aucun employé ne correspond à vos critères"
+            }}
+          </p>
+          <button
+            v-if="employees.length === 0"
+            @click="openEmployeeModal()"
+            class="btn-primary-employees"
+          >
+            <i class="fas fa-plus"></i>
+            <span>Ajouter un Employé</span>
+          </button>
+        </div>
+
+        <div v-else class="table-wrapper">
+          <table class="employees-table">
+            <thead>
+              <tr>
+                <th>NOM</th>
+                <th>GRADE</th>
+                <th>EMAIL</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="employee in filteredEmployees" :key="employee.id">
+                <td class="name-cell">
+                  <i class="fas fa-user"></i>
+                  <span>{{ employee.name }}</span>
+                </td>
+                <td class="rank-cell">
+                  <span class="rank-badge">
+                    <i class="fas fa-star"></i>
+                    {{ getRankName(employee.rankId) }}
+                  </span>
+                </td>
+                <td class="email-cell">
+                  <span v-if="employee.email" class="email-text">
+                    <i class="fas fa-envelope"></i>
+                    {{ employee.email }}
+                  </span>
+                  <span v-else class="email-empty">Non défini</span>
+                </td>
+                <td class="actions-cell">
+                  <button
+                    @click="openEmployeeModal(employee)"
+                    class="btn-icon"
+                    title="Modifier"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    @click="deleteEmployee(employee.id)"
+                    class="btn-icon btn-icon-danger"
+                    title="Supprimer"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    
+
     <EmployeeModal
       v-if="showEmployeeModal"
       :employee="editingEmployee"
@@ -157,6 +218,13 @@ const showEmployeeModal = ref(false)
 const editingEmployee = ref(null)
 const { confirm, alert } = useConfirm()
 
+// Filters
+const searchQuery = ref('')
+const rankFilter = ref('')
+const emailFilter = ref('')
+const sortBy = ref('name-asc')
+const filtersExpanded = ref(true)
+
 const getRankName = (rankId) => {
   const rank = ranks.value.find(r => r.id === rankId)
   return rank ? rank.name : 'Aucun'
@@ -167,14 +235,63 @@ const uniqueRanks = computed(() => {
   return rankIds.size
 })
 
-const employeesWithDiscord = computed(() => {
-  return employees.value.filter(e => e.discordId).length
+const employeesWithEmail = computed(() => {
+  return employees.value.filter(e => e.email).length
 })
 
-const discordPercentage = computed(() => {
+const emailPercentage = computed(() => {
   if (employees.value.length === 0) return 0
-  return Math.round((employeesWithDiscord.value / employees.value.length) * 100)
+  return Math.round((employeesWithEmail.value / employees.value.length) * 100)
 })
+
+const filteredEmployees = computed(() => {
+  let filtered = [...employees.value]
+
+  // Search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(
+      (emp) =>
+        emp.name.toLowerCase().includes(query) ||
+        (emp.email && emp.email.toLowerCase().includes(query))
+    )
+  }
+
+  // Rank filter
+  if (rankFilter.value) {
+    filtered = filtered.filter((emp) => emp.rankId === rankFilter.value)
+  }
+
+  // Email filter
+  if (emailFilter.value === 'with') {
+    filtered = filtered.filter((emp) => emp.email)
+  } else if (emailFilter.value === 'without') {
+    filtered = filtered.filter((emp) => !emp.email)
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    switch (sortBy.value) {
+      case 'name-asc':
+        return a.name.localeCompare(b.name)
+      case 'name-desc':
+        return b.name.localeCompare(a.name)
+      case 'rank-asc':
+        return getRankName(a.rankId).localeCompare(getRankName(b.rankId))
+      default:
+        return 0
+    }
+  })
+
+  return filtered
+})
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  rankFilter.value = ''
+  emailFilter.value = ''
+  sortBy.value = 'name-asc'
+}
 
 const loadData = async () => {
   try {
@@ -221,7 +338,7 @@ const deleteEmployee = async (id) => {
     confirmText: 'Supprimer'
   })
   if (!result) return
-  
+
   try {
     await remove('employees', id)
     loadData()
@@ -233,7 +350,7 @@ const deleteEmployee = async (id) => {
 
 onMounted(() => {
   loadData()
-  
+
   const db = getDb()
   onSnapshot(collection(db, 'employees'), () => loadData())
   onSnapshot(collection(db, 'ranks'), () => loadData())
@@ -242,395 +359,274 @@ onMounted(() => {
 
 <style scoped>
 .employees-dashboard {
-  animation: fadeIn 0.3s ease;
+  padding: 1rem 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Dashboard Header */
 .dashboard-header {
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 8px 24px rgba(196, 30, 58, 0.25);
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
 }
 
 .dashboard-title {
-  color: white;
   font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.dashboard-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
+  color: var(--text-primary);
   margin: 0;
 }
 
-.header-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.btn-action {
-  padding: 0.875rem 1.5rem;
-  border: none;
+/* Employees Overview Section */
+.employees-overview-section {
+  background: var(--bg-card);
   border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  font-family: 'Noto Sans JP', sans-serif;
-  white-space: nowrap;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
 }
 
-.btn-primary-action {
-  background: white;
-  color: #c41e3a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-primary-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card-large {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card-large::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #c41e3a 0%, #9a1629 100%);
-}
-
-.stat-card-large:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.stat-card-large.primary::before {
-  background: linear-gradient(90deg, #c41e3a 0%, #9a1629 100%);
-}
-
-.stat-card-large.success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-}
-
-.stat-card-large.success::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-large.info {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-}
-
-.stat-card-large.info::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-content {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
+.employees-header-block {
   margin-bottom: 1rem;
 }
 
-.stat-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  background: rgba(196, 30, 58, 0.1);
-  color: #c41e3a;
-  flex-shrink: 0;
+.employees-title-block {
+  margin-bottom: 0.75rem;
 }
 
-.stat-card-large.success .stat-icon-wrapper,
-.stat-card-large.info .stat-icon-wrapper {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+.employees-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
 }
 
-.stat-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  opacity: 0.8;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-value-large {
-  font-size: 2.25rem;
-  font-weight: 700;
-  line-height: 1.2;
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  white-space: nowrap;
-}
-
-.stat-trend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  opacity: 0.8;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.stat-card-large.success .stat-trend,
-.stat-card-large.info .stat-trend {
-  border-top-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Content Sections */
-.content-section {
-  background: white;
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.section-header-modern {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2c1810;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.section-description {
-  color: #6c757d;
-  font-size: 0.95rem;
+.employees-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-.section-actions {
+.employees-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.kpi-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.kpi-red .kpi-value {
+  color: #c41e3a;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-green .kpi-value {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-orange .kpi-value {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.kpi-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.employees-actions {
   display: flex;
   gap: 0.75rem;
 }
 
-.btn-icon-text {
-  padding: 0.65rem 1.25rem;
+.btn-primary-employees {
+  background: #c41e3a;
+  color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  background: #f3f4f6;
-  color: #6c757d;
+  gap: 0.375rem;
+  transition: all 0.2s;
 }
 
-.btn-icon-text:hover {
-  background: #e5e7eb;
+.btn-primary-employees:hover {
+  background: #a01a2e;
   transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(196, 30, 58, 0.3);
 }
 
-/* Employees Grid */
-.employees-grid {
+/* Main Content with Sidebar */
+.employees-main-content {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 
-.employee-card-modern {
-  background: #f9fafb;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
+/* Filters Sidebar */
+.filters-sidebar {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  height: fit-content;
 }
 
-.employee-card-modern:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.filters-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.filters-toggle {
+  background: none;
+  border: none;
+  color: #c41e3a;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem;
+}
+
+.filters-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-wrapper i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem 0.625rem 2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.search-input:focus {
+  outline: none;
   border-color: #c41e3a;
 }
 
-.card-header-modern {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+.filter-select {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
-.card-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  color: white;
+.filter-select:focus {
+  outline: none;
+  border-color: #c41e3a;
+}
+
+.btn-reset-filters {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.625rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2c1810;
-  margin: 0 0 0.5rem 0;
-}
-
-.card-badge {
-  display: inline-flex;
-  align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  color: white;
-  padding: 0.35rem 0.85rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
 }
 
-.card-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #6c757d;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background: #f3f4f6;
-  border-radius: 8px;
+.btn-reset-filters:hover {
+  background: #2a2d35;
+  border-color: #3a3d45;
 }
 
-.card-meta i {
-  color: #5865F2;
+/* Table Section */
+.table-section {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
 }
 
-.card-actions-modern {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.btn-card-action {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  background: white;
-  color: #6c757d;
-  border: 1px solid #e5e7eb;
-}
-
-.btn-card-action:hover {
-  background: #f3f4f6;
-  transform: translateY(-1px);
-}
-
-.btn-card-action.danger {
-  background: #fee2e2;
-  color: #dc2626;
-  border-color: #fecaca;
-}
-
-.btn-card-action.danger:hover {
-  background: #fecaca;
-}
-
-/* Loading & Empty States */
-.loading-container,
-.empty-container {
+.loading-container {
   text-align: center;
-  padding: 4rem 2rem;
-  color: #6c757d;
-}
-
-.loading-container i,
-.empty-container i {
-  font-size: 3rem;
-  color: #c41e3a;
-  margin-bottom: 1rem;
-  opacity: 0.5;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f4f6;
+  border: 4px solid #2a2d35;
   border-top-color: #c41e3a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -638,63 +634,193 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: #c41e3a;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.employees-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+.employees-table thead {
+  background: var(--bg-secondary);
+}
+
+.employees-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.employees-table th:first-child {
+  padding-left: 1rem;
+}
+
+.employees-table th:last-child {
+  text-align: center;
+  padding-right: 1rem;
+}
+
+.employees-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  vertical-align: middle;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.employees-table td:first-child {
+  padding-left: 1rem;
+}
+
+.employees-table td:last-child {
+  text-align: center;
+  padding-right: 1rem;
+}
+
+.employees-table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.name-cell i {
+  color: #c41e3a;
+  font-size: 0.875rem;
+}
+
+.rank-cell {
+  white-space: nowrap;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--bg-secondary);
+  color: #f59e0b;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.rank-badge i {
+  font-size: 0.75rem;
+}
+
+.email-cell {
+  white-space: nowrap;
+}
+
+.email-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--text-primary);
+}
+
+.email-text i {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.email-empty {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+}
+
+.btn-icon:hover {
+  background: #2a2d35;
+  border-color: #c41e3a;
+  color: #c41e3a;
+}
+
+.btn-icon-danger:hover {
+  border-color: #dc2626;
+  color: #dc2626;
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-
-  .employees-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-header {
-    padding: 1.5rem;
-  }
-
-  .dashboard-title {
-    font-size: 1.5rem;
-  }
-
-  .content-section {
-    padding: 1.5rem;
-  }
-
-  .stats-grid {
+@media (max-width: 1200px) {
+  .employees-main-content {
     grid-template-columns: 1fr;
   }
 
-  .employees-grid {
-    grid-template-columns: 1fr;
+  .left-column {
+    order: 2;
   }
 
-  .header-actions {
-    width: 100%;
-  }
-
-  .header-actions .btn-action {
-    flex: 1;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-header {
-    padding: 1.25rem;
-  }
-
-  .content-section {
-    padding: 1.25rem;
-  }
-
-  .section-header-modern {
-    flex-direction: column;
-    align-items: flex-start;
+  .table-section {
+    order: 1;
   }
 }
 </style>

@@ -8,52 +8,51 @@
         <span class="breadcrumb-item">{{ currentPageTitle }}</span>
       </div>
     </div>
-    
   </header>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed } from "vue";
 
 const props = defineProps({
-  activeTab: String
-})
+  activeTab: String,
+});
 
 const pageTitles = {
-  menu: 'Gestion de la Carte',
-  team: 'Gestion de l\'Équipe',
-  sales: 'Gestion des Ventes',
-  history: 'Historique des Ventes',
-  employees: 'Gestion des Employés',
-  ranks: 'Gestion des Grades',
-  admins: 'Gestion des Administrateurs'
-}
+  menu: "Gestion de la Carte",
+  team: "Gestion de l'Équipe",
+  sales: "Gestion des Ventes",
+  history: "Historique des Ventes",
+  employees: "Gestion des Employés",
+  ranks: "Gestion des Grades",
+  admins: "Gestion des Administrateurs",
+};
 
 const currentPageTitle = computed(() => {
-  return pageTitles[props.activeTab] || 'Panel Admin'
-})
+  return pageTitles[props.activeTab] || "Panel Admin";
+});
 
 const toggleMobileMenu = () => {
   // Émettre un événement pour ouvrir le menu mobile
-  const sidebar = document.querySelector('.admin-sidebar')
+  const sidebar = document.querySelector(".admin-sidebar");
   if (sidebar) {
-    sidebar.classList.toggle('mobile-open')
+    sidebar.classList.toggle("mobile-open");
   }
-}
+};
 </script>
 
 <style scoped>
 .admin-header {
-  background: white;
+  background: var(--bg-card);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .header-left {
@@ -66,7 +65,7 @@ const toggleMobileMenu = () => {
   display: none;
   background: transparent;
   border: none;
-  color: #2c1810;
+  color: var(--text-primary);
   font-size: 1.25rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -75,7 +74,7 @@ const toggleMobileMenu = () => {
 }
 
 .mobile-menu-btn:hover {
-  background: #f3f4f6;
+  background: var(--bg-hover);
 }
 
 .breadcrumb {
@@ -87,7 +86,7 @@ const toggleMobileMenu = () => {
 .breadcrumb-item {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #2c1810;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
 }
 
@@ -101,10 +100,9 @@ const toggleMobileMenu = () => {
   .admin-header {
     padding: 1rem;
   }
-  
+
   .breadcrumb-item {
     font-size: 1.1rem;
   }
 }
 </style>
-

@@ -1,131 +1,193 @@
 <template>
   <div class="team-dashboard">
-    <!-- Header avec actions rapides -->
+    <!-- Header -->
     <div class="dashboard-header">
-      <div class="header-content">
-        <div>
-          <h1 class="dashboard-title">Gestion de l'Équipe</h1>
-          <p class="dashboard-subtitle">Gérez les membres de votre organigramme</p>
+      <h1 class="dashboard-title">Gestion de l'Équipe</h1>
+    </div>
+
+    <!-- Section Stats et Actions -->
+    <div class="team-overview-section">
+      <div class="team-header-block">
+        <div class="team-title-block">
+          <h2 class="team-title">Membres</h2>
+          <p class="team-subtitle">{{ members.length }} membre(s) enregistré(s)</p>
         </div>
-        <div class="header-actions">
-          <button @click="openMemberModal()" class="btn-action btn-primary-action">
-            <i class="fas fa-plus-circle"></i>
-            <span>Nouveau Membre</span>
-          </button>
+        <div class="team-kpis">
+          <div class="kpi-item kpi-red">
+            <span class="kpi-label">TOTAL</span>
+            <span class="kpi-value">{{ members.length }}</span>
+          </div>
+          <div class="kpi-item kpi-green">
+            <span class="kpi-label">AVEC PHOTO</span>
+            <span class="kpi-value">{{ membersWithPhoto }}</span>
+          </div>
+          <div class="kpi-item kpi-green">
+            <span class="kpi-label">RÔLES</span>
+            <span class="kpi-value">{{ uniqueRoles }}</span>
+          </div>
+          <div class="kpi-item kpi-orange">
+            <span class="kpi-label">POURCENTAGE</span>
+            <span class="kpi-value">{{ photoPercentage }}%</span>
+          </div>
         </div>
+      </div>
+
+      <div class="team-actions">
+        <button @click="openMemberModal()" class="btn-primary-team">
+          <i class="fas fa-plus"></i>
+          <span>Nouveau Membre</span>
+        </button>
       </div>
     </div>
 
-    <!-- Statistiques principales -->
-    <div class="stats-grid">
-      <div class="stat-card-large primary">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
+    <!-- Main Content with Sidebar -->
+    <div class="team-main-content">
+      <!-- Left Column: Filters -->
+      <div class="left-column">
+        <!-- Filters Sidebar -->
+        <div class="filters-sidebar">
+          <div class="filters-header">
+            <h3 class="filters-title">Filtres</h3>
+            <button
+              @click="filtersExpanded = !filtersExpanded"
+              class="filters-toggle"
+            >
+              <i :class="filtersExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+            </button>
+          </div>
+
+          <div v-show="filtersExpanded" class="filters-content">
+            <div class="filter-group">
+              <label class="filter-label">Recherche</label>
+              <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Rechercher..."
+                  class="search-input"
+                />
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Rôle</label>
+              <select v-model="roleFilter" class="filter-select">
+                <option value="">Tous les rôles</option>
+                <option v-for="role in uniqueRolesList" :key="role" :value="role">
+                  {{ role }}
+                </option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Photo</label>
+              <select v-model="photoFilter" class="filter-select">
+                <option value="">Tous</option>
+                <option value="with">Avec Photo</option>
+                <option value="without">Sans Photo</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Tri par</label>
+              <select v-model="sortBy" class="filter-select">
+                <option value="name-asc">Nom (A-Z)</option>
+                <option value="name-desc">Nom (Z-A)</option>
+                <option value="role-asc">Rôle (A-Z)</option>
+                <option value="order-asc">Ordre</option>
+              </select>
+            </div>
+
+            <button @click="resetFilters" class="btn-reset-filters">
+              <i class="fas fa-times"></i>
+              <span>Réinitialiser</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Section -->
+      <div class="table-section">
+        <div v-if="loading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Chargement des données...</p>
+        </div>
+
+        <div v-else-if="filteredMembers.length === 0" class="empty-state">
+          <div class="empty-icon">
             <i class="fas fa-users"></i>
           </div>
-          <div class="stat-info">
-            <div class="stat-label">Total Membres</div>
-            <div class="stat-value-large">
-              <span>{{ members.length }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-check-circle"></i>
-          <span>Dans l'organigramme</span>
-        </div>
-      </div>
-
-      <div class="stat-card-large success">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-user-tie"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Avec Photo</div>
-            <div class="stat-value-large">
-              <span>{{ membersWithPhoto }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-image"></i>
-          <span>{{ photoPercentage }}% avec photo</span>
-        </div>
-      </div>
-
-      <div class="stat-card-large info">
-        <div class="stat-card-content">
-          <div class="stat-icon-wrapper">
-            <i class="fas fa-briefcase"></i>
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">Rôles Uniques</div>
-            <div class="stat-value-large">
-              <span>{{ uniqueRoles }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-trend">
-          <i class="fas fa-tags"></i>
-          <span>Différents rôles</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Membres de l'Équipe -->
-    <div class="content-section">
-      <div class="section-header-modern">
-        <div>
-          <h2 class="section-title">Membres de l'Équipe</h2>
-          <p class="section-description">Gérez les membres affichés dans l'organigramme</p>
-        </div>
-        <div class="section-actions">
-          <button @click="openMemberModal()" class="btn-icon-text">
+          <h3>
+            {{ members.length === 0 ? "Aucun membre dans l'organigramme" : "Aucun résultat" }}
+          </h3>
+          <p>
+            {{
+              members.length === 0
+                ? "Ajoutez-en un pour commencer !"
+                : "Aucun membre ne correspond à vos critères"
+            }}
+          </p>
+          <button
+            v-if="members.length === 0"
+            @click="openMemberModal()"
+            class="btn-primary-team"
+          >
             <i class="fas fa-plus"></i>
-            <span>Ajouter</span>
+            <span>Ajouter un Membre</span>
           </button>
         </div>
-      </div>
 
-      <div v-if="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Chargement des données...</p>
-      </div>
-      <div v-else-if="members.length === 0" class="empty-container">
-        <i class="fas fa-users"></i>
-        <p>Aucun membre dans l'organigramme. Ajoutez-en un pour commencer !</p>
-      </div>
-      <div v-else class="members-grid">
-        <div v-for="member in sortedMembers" :key="member.id" class="member-card-modern">
-          <div class="card-header-modern">
-            <div class="member-avatar-wrapper">
-              <img v-if="member.photo" :src="member.photo" :alt="member.name" class="member-avatar-large">
-              <div v-else class="member-avatar-placeholder">
-                <i class="fas fa-user"></i>
-              </div>
-            </div>
-            <div class="card-info">
-              <h3 class="card-title">{{ member.name }}</h3>
-              <div class="card-badge">
-                <i class="fas fa-briefcase"></i>
-                {{ member.role || 'Rôle non défini' }}
-              </div>
-            </div>
-          </div>
-          <div v-if="member.description" class="card-description">
-            {{ member.description }}
-          </div>
-          <div class="card-actions-modern">
-            <button @click="openMemberModal(member)" class="btn-card-action">
-              <i class="fas fa-edit"></i>
-              <span>Modifier</span>
-            </button>
-            <button @click="deleteMember(member.id)" class="btn-card-action danger">
-              <i class="fas fa-trash"></i>
-              <span>Supprimer</span>
-            </button>
-          </div>
+        <div v-else class="table-wrapper">
+          <table class="team-table">
+            <thead>
+              <tr>
+                <th>PHOTO</th>
+                <th>NOM</th>
+                <th>RÔLE</th>
+                <th>DESCRIPTION</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="member in filteredMembers" :key="member.id">
+                <td class="photo-cell">
+                  <div class="avatar-wrapper">
+                    <img v-if="member.photo" :src="member.photo" :alt="member.name" class="avatar-img" />
+                    <div v-else class="avatar-placeholder">
+                      <i class="fas fa-user"></i>
+                    </div>
+                  </div>
+                </td>
+                <td class="name-cell">
+                  <span class="name-text">{{ member.name }}</span>
+                </td>
+                <td class="role-cell">
+                  <span class="role-badge">{{ member.role || "Non défini" }}</span>
+                </td>
+                <td class="description-cell">
+                  <span v-if="member.description" class="description-text">{{ member.description }}</span>
+                  <span v-else class="description-empty">Aucune description</span>
+                </td>
+                <td class="actions-cell">
+                  <button
+                    @click="openMemberModal(member)"
+                    class="btn-icon"
+                    title="Modifier"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    @click="deleteMember(member.id)"
+                    class="btn-icon btn-icon-danger"
+                    title="Supprimer"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -154,6 +216,13 @@ const showMemberModal = ref(false)
 const editingMember = ref(null)
 const { confirm, alert } = useConfirm()
 
+// Filters
+const searchQuery = ref("")
+const roleFilter = ref("")
+const photoFilter = ref("")
+const sortBy = ref("order-asc")
+const filtersExpanded = ref(true)
+
 const sortedMembers = computed(() => {
   return [...members.value].sort((a, b) => (a.order || 0) - (b.order || 0))
 })
@@ -171,6 +240,64 @@ const uniqueRoles = computed(() => {
   const roles = new Set(members.value.map(m => m.role).filter(Boolean))
   return roles.size
 })
+
+const uniqueRolesList = computed(() => {
+  return Array.from(new Set(members.value.map(m => m.role).filter(Boolean))).sort()
+})
+
+const filteredMembers = computed(() => {
+  let filtered = [...members.value]
+
+  // Search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(
+      (member) =>
+        member.name.toLowerCase().includes(query) ||
+        (member.role && member.role.toLowerCase().includes(query)) ||
+        (member.description && member.description.toLowerCase().includes(query))
+    )
+  }
+
+  // Role filter
+  if (roleFilter.value) {
+    filtered = filtered.filter((member) => member.role === roleFilter.value)
+  }
+
+  // Photo filter
+  if (photoFilter.value === "with") {
+    filtered = filtered.filter((member) => member.photo)
+  } else if (photoFilter.value === "without") {
+    filtered = filtered.filter((member) => !member.photo)
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    switch (sortBy.value) {
+      case "name-asc":
+        return a.name.localeCompare(b.name)
+      case "name-desc":
+        return b.name.localeCompare(a.name)
+      case "role-asc":
+        const roleA = a.role || ""
+        const roleB = b.role || ""
+        return roleA.localeCompare(roleB)
+      case "order-asc":
+        return (a.order || 0) - (b.order || 0)
+      default:
+        return 0
+    }
+  })
+
+  return filtered
+})
+
+const resetFilters = () => {
+  searchQuery.value = ""
+  roleFilter.value = ""
+  photoFilter.value = ""
+  sortBy.value = "order-asc"
+}
 
 const loadData = async () => {
   try {
@@ -252,398 +379,274 @@ onMounted(() => {
 
 <style scoped>
 .team-dashboard {
-  animation: fadeIn 0.3s ease;
+  padding: 1rem 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Dashboard Header */
 .dashboard-header {
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 8px 24px rgba(196, 30, 58, 0.25);
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
 }
 
 .dashboard-title {
-  color: white;
   font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.dashboard-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
+  color: var(--text-primary);
   margin: 0;
 }
 
-.header-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.btn-action {
-  padding: 0.875rem 1.5rem;
-  border: none;
+/* Team Overview Section */
+.team-overview-section {
+  background: var(--bg-card);
   border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  font-family: 'Noto Sans JP', sans-serif;
-  white-space: nowrap;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
 }
 
-.btn-primary-action {
-  background: white;
-  color: #c41e3a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-primary-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card-large {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card-large::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #c41e3a 0%, #9a1629 100%);
-}
-
-.stat-card-large:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.stat-card-large.primary::before {
-  background: linear-gradient(90deg, #c41e3a 0%, #9a1629 100%);
-}
-
-.stat-card-large.success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-}
-
-.stat-card-large.success::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-large.info {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-}
-
-.stat-card-large.info::before {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.stat-card-content {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
+.team-header-block {
   margin-bottom: 1rem;
 }
 
-.stat-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  background: rgba(196, 30, 58, 0.1);
-  color: #c41e3a;
-  flex-shrink: 0;
+.team-title-block {
+  margin-bottom: 0.75rem;
 }
 
-.stat-card-large.success .stat-icon-wrapper,
-.stat-card-large.info .stat-icon-wrapper {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+.team-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
 }
 
-.stat-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  opacity: 0.8;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-value-large {
-  font-size: 2.25rem;
-  font-weight: 700;
-  line-height: 1.2;
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  white-space: nowrap;
-}
-
-.stat-trend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  opacity: 0.8;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.stat-card-large.success .stat-trend,
-.stat-card-large.info .stat-trend {
-  border-top-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Content Sections */
-.content-section {
-  background: white;
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.section-header-modern {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2c1810;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
-}
-
-.section-description {
-  color: #6c757d;
-  font-size: 0.95rem;
+.team-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-.section-actions {
+.team-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.kpi-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.kpi-red .kpi-value {
+  color: #c41e3a;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-green .kpi-value {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-orange .kpi-value {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.kpi-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.kpi-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.team-actions {
   display: flex;
   gap: 0.75rem;
 }
 
-.btn-icon-text {
-  padding: 0.65rem 1.25rem;
+.btn-primary-team {
+  background: #c41e3a;
+  color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  background: #f3f4f6;
-  color: #6c757d;
+  gap: 0.375rem;
+  transition: all 0.2s;
 }
 
-.btn-icon-text:hover {
-  background: #e5e7eb;
+.btn-primary-team:hover {
+  background: #a01a2e;
   transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(196, 30, 58, 0.3);
 }
 
-/* Members Grid */
-.members-grid {
+/* Main Content with Sidebar */
+.team-main-content {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 
-.member-card-modern {
-  background: #f9fafb;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
+/* Filters Sidebar */
+.filters-sidebar {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  height: fit-content;
 }
 
-.member-card-modern:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.filters-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.filters-toggle {
+  background: none;
+  border: none;
+  color: #c41e3a;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem;
+}
+
+.filters-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-wrapper i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem 0.625rem 2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.search-input:focus {
+  outline: none;
   border-color: #c41e3a;
 }
 
-.card-header-modern {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+.filter-select {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
-.member-avatar-wrapper {
-  flex-shrink: 0;
+.filter-select:focus {
+  outline: none;
+  border-color: #c41e3a;
 }
 
-.member-avatar-large {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #c41e3a;
-}
-
-.member-avatar-placeholder {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  color: white;
+.btn-reset-filters {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.625rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  border: 3px solid #c41e3a;
-}
-
-.card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2c1810;
-  margin: 0 0 0.5rem 0;
-}
-
-.card-badge {
-  display: inline-flex;
-  align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
-  color: white;
-  padding: 0.35rem 0.85rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
 }
 
-.card-description {
-  color: #6c757d;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 1rem 0;
+.btn-reset-filters:hover {
+  background: var(--bg-secondary);
+  border-color: #3a3d45;
 }
 
-.card-actions-modern {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+/* Table Section */
+.table-section {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
 }
 
-.btn-card-action {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  background: white;
-  color: #6c757d;
-  border: 1px solid #e5e7eb;
-}
-
-.btn-card-action:hover {
-  background: #f3f4f6;
-  transform: translateY(-1px);
-}
-
-.btn-card-action.danger {
-  background: #fee2e2;
-  color: #dc2626;
-  border-color: #fecaca;
-}
-
-.btn-card-action.danger:hover {
-  background: #fecaca;
-}
-
-/* Loading & Empty States */
-.loading-container,
-.empty-container {
+.loading-container {
   text-align: center;
-  padding: 4rem 2rem;
-  color: #6c757d;
-}
-
-.loading-container i,
-.empty-container i {
-  font-size: 3rem;
-  color: #c41e3a;
-  margin-bottom: 1rem;
-  opacity: 0.5;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f4f6;
+  border: 4px solid #2a2d35;
   border-top-color: #c41e3a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -651,63 +654,218 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: #c41e3a;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+.team-table thead {
+  background: var(--bg-secondary);
+}
+
+.team-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.team-table th:first-child {
+  padding-left: 1rem;
+}
+
+.team-table th:last-child {
+  text-align: center;
+  padding-right: 1rem;
+}
+
+.team-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  vertical-align: middle;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.team-table td:first-child {
+  padding-left: 1rem;
+}
+
+.team-table td:last-child {
+  text-align: center;
+  padding-right: 1rem;
+}
+
+.team-table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+.photo-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.avatar-wrapper {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.avatar-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #c41e3a;
+}
+
+.avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid #c41e3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c41e3a;
+  font-size: 1.125rem;
+}
+
+.name-cell {
+  white-space: nowrap;
+}
+
+.name-text {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.role-cell {
+  white-space: nowrap;
+}
+
+.role-badge {
+  display: inline-block;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+}
+
+.description-cell {
+  max-width: 300px;
+}
+
+.description-text {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.description-empty {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.8125rem;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+}
+
+.btn-icon:hover {
+  background: var(--bg-secondary);
+  border-color: #c41e3a;
+  color: #c41e3a;
+}
+
+.btn-icon-danger:hover {
+  border-color: #dc2626;
+  color: #dc2626;
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-
-  .members-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-header {
-    padding: 1.5rem;
-  }
-
-  .dashboard-title {
-    font-size: 1.5rem;
-  }
-
-  .content-section {
-    padding: 1.5rem;
-  }
-
-  .stats-grid {
+@media (max-width: 1200px) {
+  .team-main-content {
     grid-template-columns: 1fr;
   }
 
-  .members-grid {
-    grid-template-columns: 1fr;
+  .left-column {
+    order: 2;
   }
 
-  .header-actions {
-    width: 100%;
-  }
-
-  .header-actions .btn-action {
-    flex: 1;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-header {
-    padding: 1.25rem;
-  }
-
-  .content-section {
-    padding: 1.25rem;
-  }
-
-  .section-header-modern {
-    flex-direction: column;
-    align-items: flex-start;
+  .table-section {
+    order: 1;
   }
 }
 </style>

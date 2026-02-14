@@ -1,47 +1,40 @@
 <template>
-  <div class="ranks-dashboard">
+  <div class="login-tracking-dashboard">
     <!-- Header -->
     <div class="dashboard-header">
-      <h1 class="dashboard-title">Gestion des Grades</h1>
+      <h1 class="dashboard-title">Suivi des Connexions</h1>
     </div>
 
     <!-- Section Stats et Actions -->
-    <div class="ranks-overview-section">
-      <div class="ranks-header-block">
-        <div class="ranks-title-block">
-          <h2 class="ranks-title">Grades</h2>
-          <p class="ranks-subtitle">{{ ranks.length }} grade(s) enregistré(s)</p>
+    <div class="login-overview-section">
+      <div class="login-header-block">
+        <div class="login-title-block">
+          <h2 class="login-title">Connexions</h2>
+          <p class="login-subtitle">{{ loginEvents.length }} événement(s) enregistré(s)</p>
         </div>
-        <div class="ranks-kpis">
+        <div class="login-kpis">
           <div class="kpi-item kpi-red">
-            <span class="kpi-label">TOTAL</span>
-            <span class="kpi-value">{{ ranks.length }}</span>
+            <span class="kpi-label">AUJOURD'HUI</span>
+            <span class="kpi-value">{{ todaysLogins }}</span>
           </div>
           <div class="kpi-item kpi-green">
-            <span class="kpi-label">MOYENNE</span>
-            <span class="kpi-value">{{ averageCommission.toFixed(1) }}%</span>
+            <span class="kpi-label">ACTIFS</span>
+            <span class="kpi-value">{{ activeUsers }}</span>
           </div>
           <div class="kpi-item kpi-green">
-            <span class="kpi-label">MAXIMUM</span>
-            <span class="kpi-value">{{ maxCommission.toFixed(1) }}%</span>
+            <span class="kpi-label">SESSIONS</span>
+            <span class="kpi-value">{{ averageSessionTime }} min</span>
           </div>
           <div class="kpi-item kpi-orange">
-            <span class="kpi-label">MINIMUM</span>
-            <span class="kpi-value">{{ minCommission.toFixed(1) }}%</span>
+            <span class="kpi-label">TOTAL</span>
+            <span class="kpi-value">{{ loginEvents.length }}</span>
           </div>
         </div>
-      </div>
-
-      <div class="ranks-actions">
-        <button @click="openRankModal()" class="btn-primary-ranks">
-          <i class="fas fa-plus"></i>
-          <span>Nouveau Grade</span>
-        </button>
       </div>
     </div>
 
     <!-- Main Content with Sidebar -->
-    <div class="ranks-main-content">
+    <div class="login-main-content">
       <!-- Left Column: Filters -->
       <div class="left-column">
         <!-- Filters Sidebar -->
@@ -71,12 +64,20 @@
             </div>
 
             <div class="filter-group">
+              <label class="filter-label">Type</label>
+              <select v-model="typeFilter" class="filter-select">
+                <option value="">Tous les types</option>
+                <option value="success">Connexions réussies</option>
+                <option value="failure">Échecs de connexion</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
               <label class="filter-label">Tri par</label>
               <select v-model="sortBy" class="filter-select">
-                <option value="name-asc">Nom (A-Z)</option>
-                <option value="name-desc">Nom (Z-A)</option>
-                <option value="commission-desc">Commission (décroissant)</option>
-                <option value="commission-asc">Commission (croissant)</option>
+                <option value="date-desc">Date (récent)</option>
+                <option value="date-asc">Date (ancien)</option>
+                <option value="user-asc">Utilisateur (A-Z)</option>
               </select>
             </div>
 
@@ -95,67 +96,58 @@
           <p>Chargement des données...</p>
         </div>
 
-        <div v-else-if="filteredRanks.length === 0" class="empty-state">
+        <div v-else-if="filteredEvents.length === 0" class="empty-state">
           <div class="empty-icon">
-            <i class="fas fa-star"></i>
+            <i class="fas fa-sign-in-alt"></i>
           </div>
           <h3>
-            {{ ranks.length === 0 ? "Aucun grade enregistré" : "Aucun résultat" }}
+            {{ loginEvents.length === 0 ? "Aucune connexion récente" : "Aucun résultat" }}
           </h3>
           <p>
             {{
-              ranks.length === 0
-                ? "Commencez par ajouter votre premier grade"
-                : "Aucun grade ne correspond à vos critères"
+              loginEvents.length === 0
+                ? "Les connexions apparaîtront ici"
+                : "Aucun événement ne correspond à vos critères"
             }}
           </p>
-          <button
-            v-if="ranks.length === 0"
-            @click="openRankModal()"
-            class="btn-primary-ranks"
-          >
-            <i class="fas fa-plus"></i>
-            <span>Ajouter un Grade</span>
-          </button>
         </div>
 
         <div v-else class="table-wrapper">
-          <table class="ranks-table">
+          <table class="login-table">
             <thead>
               <tr>
-                <th>NOM</th>
-                <th>COMMISSION</th>
-                <th>DESCRIPTION</th>
+                <th>UTILISATEUR</th>
+                <th>DATE</th>
+                <th>TYPE</th>
+                <th>IP</th>
                 <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="rank in filteredRanks" :key="rank.id">
-                <td class="name-cell">
-                  <i class="fas fa-star"></i>
-                  <span>{{ rank.name }}</span>
+              <tr v-for="event in filteredEvents" :key="event.id">
+                <td class="user-cell">
+                  <i class="fas fa-user"></i>
+                  <span>{{ event.user || event.email || "Utilisateur" }}</span>
                 </td>
-                <td class="commission-cell">
-                  <span class="commission-value">{{ parseFloat(rank.percentage).toFixed(2) }}%</span>
+                <td class="date-cell">
+                  <i class="fas fa-clock"></i>
+                  <span>{{ formatDate(event.timestamp) }}</span>
                 </td>
-                <td class="description-cell">
-                  <span v-if="rank.description" class="description-text">{{ rank.description }}</span>
-                  <span v-else class="description-empty">Aucune description</span>
+                <td class="type-cell" :class="event.success ? 'type-success' : 'type-failure'">
+                  <span class="type-badge">{{ event.type || "Connexion" }}</span>
+                </td>
+                <td class="ip-cell">
+                  <span v-if="event.ip">{{ event.ip }}</span>
+                  <span v-else class="ip-empty">Non disponible</span>
                 </td>
                 <td class="actions-cell">
                   <button
-                    @click="openRankModal(rank)"
+                    v-if="canManageAdmins && event.email && !isExistingAdmin(event.email)"
+                    @click="quickAddAdmin(event.email)"
                     class="btn-icon"
-                    title="Modifier"
+                    title="Ajouter comme admin"
                   >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    @click="deleteRank(rank.id)"
-                    class="btn-icon btn-icon-danger"
-                    title="Supprimer"
-                  >
-                    <i class="fas fa-trash"></i>
+                    <i class="fas fa-user-plus"></i>
                   </button>
                 </td>
               </tr>
@@ -164,161 +156,166 @@
         </div>
       </div>
     </div>
-
-    <RankModal
-      v-if="showRankModal"
-      :rank="editingRank"
-      @close="closeRankModal"
-      @save="saveRank"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useFirestore } from '../../../composables/useFirestore'
-import { useConfirm } from '../../../composables/useConfirm'
-import { getDb } from '../../../composables/useFirebase'
-import { collection, onSnapshot } from 'firebase/firestore'
-import RankModal from '../modals/RankModal.vue'
+import { ref, computed, onMounted } from "vue";
+import { useFirestore } from "../../../composables/useFirestore";
+import { useAuth } from "../../../composables/useAuth";
 
-const { getAll, create, update, remove } = useFirestore()
+const emit = defineEmits(["change-tab"]);
 
-const ranks = ref([])
-const loading = ref(true)
-const showRankModal = ref(false)
-const editingRank = ref(null)
-const { confirm, alert } = useConfirm()
+const { getAll } = useFirestore();
+const { isSuperAdmin, permissions } = useAuth();
+
+const loginEvents = ref([]);
+const loading = ref(true);
+const adminEmails = ref([]);
 
 // Filters
-const searchQuery = ref('')
-const sortBy = ref('name-asc')
+const searchQuery = ref("")
+const typeFilter = ref("")
+const sortBy = ref("date-desc")
 const filtersExpanded = ref(true)
 
-const averageCommission = computed(() => {
-  if (ranks.value.length === 0) return 0
-  const total = ranks.value.reduce((sum, rank) => {
-    return sum + parseFloat(rank.percentage || 0)
-  }, 0)
-  return total / ranks.value.length
-})
+const todaysLogins = computed(() => {
+  const today = new Date().toDateString();
+  return loginEvents.value.filter(
+    (event) => new Date(event.timestamp).toDateString() === today
+  ).length;
+});
 
-const maxCommission = computed(() => {
-  if (ranks.value.length === 0) return 0
-  return Math.max(...ranks.value.map(r => parseFloat(r.percentage || 0)))
-})
+const activeUsers = computed(() => {
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const uniqueUsers = new Set(
+    loginEvents.value
+      .filter((event) => new Date(event.timestamp) > weekAgo)
+      .map((event) => event.user || event.email)
+  );
+  return uniqueUsers.size;
+});
 
-const minCommission = computed(() => {
-  if (ranks.value.length === 0) return 0
-  return Math.min(...ranks.value.map(r => parseFloat(r.percentage || 0)))
-})
+const averageSessionTime = computed(() => {
+  return "25";
+});
 
-const filteredRanks = computed(() => {
-  let filtered = [...ranks.value]
+const canManageAdmins = computed(() => {
+  return isSuperAdmin.value || permissions.value.admins === true;
+});
+
+const isExistingAdmin = (email) => {
+  return adminEmails.value.includes(email.toLowerCase());
+};
+
+const quickAddAdmin = (email = null) => {
+  if (email) {
+    sessionStorage.setItem("admin_prefill_email", email);
+  }
+  emit("change-tab", "admins");
+};
+
+const loadAdmins = async () => {
+  try {
+    const admins = await getAll("admins");
+    adminEmails.value = admins
+      .map((admin) => admin.email?.toLowerCase())
+      .filter(Boolean);
+  } catch (error) {
+    console.error("Erreur lors du chargement des admins:", error);
+  }
+};
+
+const filteredEvents = computed(() => {
+  let filtered = [...loginEvents.value];
 
   // Search filter
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(
-      (rank) =>
-        rank.name.toLowerCase().includes(query) ||
-        (rank.description && rank.description.toLowerCase().includes(query))
-    )
+      (event) =>
+        (event.user && event.user.toLowerCase().includes(query)) ||
+        (event.email && event.email.toLowerCase().includes(query)) ||
+        (event.ip && event.ip.toLowerCase().includes(query))
+    );
+  }
+
+  // Type filter
+  if (typeFilter.value === "success") {
+    filtered = filtered.filter((event) => event.success !== false);
+  } else if (typeFilter.value === "failure") {
+    filtered = filtered.filter((event) => event.success === false);
   }
 
   // Sort
   filtered.sort((a, b) => {
     switch (sortBy.value) {
-      case 'name-asc':
-        return a.name.localeCompare(b.name)
-      case 'name-desc':
-        return b.name.localeCompare(a.name)
-      case 'commission-desc':
-        return parseFloat(b.percentage || 0) - parseFloat(a.percentage || 0)
-      case 'commission-asc':
-        return parseFloat(a.percentage || 0) - parseFloat(b.percentage || 0)
+      case "date-desc":
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      case "date-asc":
+        return new Date(a.timestamp) - new Date(b.timestamp);
+      case "user-asc":
+        const userA = a.user || a.email || "";
+        const userB = b.user || b.email || "";
+        return userA.localeCompare(userB);
       default:
-        return 0
+        return 0;
     }
-  })
+  });
 
-  return filtered
-})
+  return filtered;
+});
 
 const resetFilters = () => {
-  searchQuery.value = ''
-  sortBy.value = 'name-asc'
+  searchQuery.value = ""
+  typeFilter.value = ""
+  sortBy.value = "date-desc"
 }
 
 const loadData = async () => {
   try {
-    loading.value = true
-    ranks.value = await getAll('ranks', 'name')
-    loading.value = false
+    loading.value = true;
+    const events = await getAll("login_events");
+
+    loginEvents.value = events
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .map((event, index) => ({
+        id: event.id || index,
+        user: event.user || event.email || "Utilisateur inconnu",
+        email: event.user || event.email,
+        timestamp: event.timestamp,
+        type:
+          event.type ||
+          (event.success ? "Connexion réussie" : "Échec de connexion"),
+        method: event.method || "unknown",
+        ip: event.ip || null,
+        success: event.success !== false,
+      }));
+
+    loading.value = false;
   } catch (error) {
-    console.error('Erreur lors du chargement:', error)
-    loading.value = false
+    console.error(
+      "Erreur lors du chargement des événements de connexion:",
+      error
+    );
+    loginEvents.value = [];
+    loading.value = false;
   }
-}
+};
 
-const openRankModal = (rank = null) => {
-  editingRank.value = rank
-  showRankModal.value = true
-}
-
-const closeRankModal = () => {
-  showRankModal.value = false
-  editingRank.value = null
-}
-
-const saveRank = async (rankData) => {
-  try {
-    const data = {
-      ...rankData,
-      percentage: parseFloat(rankData.percentage)
-    }
-
-    if (editingRank.value) {
-      await update('ranks', editingRank.value.id, data)
-    } else {
-      await create('ranks', data)
-    }
-
-    closeRankModal()
-    loadData()
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde:', error)
-    await alert('Erreur lors de la sauvegarde', { type: 'danger' })
-  }
-}
-
-const deleteRank = async (id) => {
-  const result = await confirm('Êtes-vous sûr de vouloir supprimer ce grade ? Les employés avec ce grade devront être réassignés.', {
-    type: 'warning',
-    title: 'Supprimer un grade',
-    confirmText: 'Supprimer'
-  })
-  if (!result) return
-
-  try {
-    await remove('ranks', id)
-    loadData()
-  } catch (error) {
-    console.error('Erreur lors de la suppression:', error)
-    await alert('Erreur lors de la suppression', { type: 'danger' })
-  }
-}
+const formatDate = (timestamp) => {
+  return new Date(timestamp).toLocaleString("fr-FR");
+};
 
 onMounted(() => {
-  loadData()
-
-  const db = getDb()
-  onSnapshot(collection(db, 'ranks'), () => loadData())
-})
+  loadData();
+  loadAdmins();
+});
 </script>
 
 <style scoped>
-.ranks-dashboard {
+.login-tracking-dashboard {
   padding: 1rem 2rem;
   max-width: 1600px;
   margin: 0 auto;
@@ -335,8 +332,8 @@ onMounted(() => {
   margin: 0;
 }
 
-/* Ranks Overview Section */
-.ranks-overview-section {
+/* Login Overview Section */
+.login-overview-section {
   background: var(--bg-card);
   border-radius: 12px;
   padding: 1rem 1.25rem;
@@ -345,28 +342,28 @@ onMounted(() => {
   border: 1px solid var(--border-color);
 }
 
-.ranks-header-block {
-  margin-bottom: 1rem;
+.login-header-block {
+  margin-bottom: 0;
 }
 
-.ranks-title-block {
+.login-title-block {
   margin-bottom: 0.75rem;
 }
 
-.ranks-title {
+.login-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 0.25rem 0;
 }
 
-.ranks-subtitle {
+.login-subtitle {
   font-size: 0.75rem;
   color: var(--text-secondary);
   margin: 0;
 }
 
-.ranks-kpis {
+.login-kpis {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
@@ -412,34 +409,8 @@ onMounted(() => {
   font-weight: 700;
 }
 
-.ranks-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.btn-primary-ranks {
-  background: #c41e3a;
-  color: white;
-  border: none;
-  padding: 0.625rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  transition: all 0.2s;
-}
-
-.btn-primary-ranks:hover {
-  background: #a01a2e;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(196, 30, 58, 0.3);
-}
-
 /* Main Content with Sidebar */
-.ranks-main-content {
+.login-main-content {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 1.5rem;
@@ -586,7 +557,7 @@ onMounted(() => {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #2a2d35;
+  border: 4px solid var(--border-color);
   border-top-color: #c41e3a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -621,24 +592,24 @@ onMounted(() => {
 
 .empty-state p {
   font-size: 0.875rem;
-  margin: 0 0 1.5rem 0;
+  margin: 0;
 }
 
 .table-wrapper {
   overflow-x: auto;
 }
 
-.ranks-table {
+.login-table {
   width: 100%;
   border-collapse: collapse;
   background: transparent;
 }
 
-.ranks-table thead {
+.login-table thead {
   background: var(--bg-secondary);
 }
 
-.ranks-table th {
+.login-table th {
   padding: 0.875rem 1rem;
   text-align: left;
   font-size: 0.75rem;
@@ -651,16 +622,16 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.ranks-table th:first-child {
+.login-table th:first-child {
   padding-left: 1rem;
 }
 
-.ranks-table th:last-child {
+.login-table th:last-child {
   text-align: center;
   padding-right: 1rem;
 }
 
-.ranks-table td {
+.login-table td {
   padding: 0.875rem 1rem;
   border-bottom: 1px solid var(--border-color);
   font-size: 0.875rem;
@@ -670,54 +641,72 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-.ranks-table td:first-child {
+.login-table td:first-child {
   padding-left: 1rem;
 }
 
-.ranks-table td:last-child {
+.login-table td:last-child {
   text-align: center;
   padding-right: 1rem;
 }
 
-.ranks-table tbody tr:hover {
+.login-table tbody tr:hover {
   background: var(--bg-secondary);
 }
 
-.name-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.name-cell i {
-  color: #f59e0b;
-  font-size: 0.875rem;
-}
-
-.commission-cell {
+.user-cell {
   white-space: nowrap;
 }
 
-.commission-value {
-  color: #16a34a;
-  font-weight: 600;
-  font-size: 0.9375rem;
-}
-
-.description-cell {
-  max-width: 300px;
-}
-
-.description-text {
+.user-cell i {
   color: var(--text-secondary);
-  font-size: 0.8125rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+  vertical-align: middle;
 }
 
-.description-empty {
+.date-cell {
+  white-space: nowrap;
+}
+
+.date-cell i {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.type-cell {
+  white-space: nowrap;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.type-success .type-badge {
+  background: #16a34a;
+  color: var(--text-primary);
+}
+
+.type-failure .type-badge {
+  background: #dc2626;
+  color: var(--text-primary);
+}
+
+.ip-cell {
+  white-space: nowrap;
+}
+
+.ip-empty {
   color: #6b7280;
   font-style: italic;
   font-size: 0.8125rem;
@@ -752,14 +741,9 @@ onMounted(() => {
   color: #c41e3a;
 }
 
-.btn-icon-danger:hover {
-  border-color: #dc2626;
-  color: #dc2626;
-}
-
 /* Responsive */
 @media (max-width: 1200px) {
-  .ranks-main-content {
+  .login-main-content {
     grid-template-columns: 1fr;
   }
 

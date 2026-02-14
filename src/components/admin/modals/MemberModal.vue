@@ -172,14 +172,15 @@ const handleSubmit = () => {
 }
 
 .modal-container {
-  background: white;
+  background: #1b1e26;
   border-radius: 20px;
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid #2a2d35;
   animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   will-change: transform, opacity;
@@ -199,12 +200,13 @@ const handleSubmit = () => {
 
 .modal-header {
   padding: 2rem;
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
+  background: #252831;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1.5rem;
+  border-bottom: 1px solid #2a2d35;
 }
 
 .modal-header-content {
@@ -216,13 +218,14 @@ const handleSubmit = () => {
 .modal-icon {
   width: 56px;
   height: 56px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #c41e3a;
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   flex-shrink: 0;
+  color: white;
 }
 
 .modal-header h2 {
@@ -239,9 +242,9 @@ const handleSubmit = () => {
 }
 
 .modal-close {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
+  background: #2a2d35;
+  border: 1px solid #3a3d45;
+  color: #ffffff;
   width: 40px;
   height: 40px;
   border-radius: 10px;
@@ -255,7 +258,9 @@ const handleSubmit = () => {
 }
 
 .modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #3a3d45;
+  border-color: #c41e3a;
+  color: #c41e3a;
   transform: rotate(90deg);
 }
 
@@ -263,6 +268,7 @@ const handleSubmit = () => {
   padding: 2rem;
   overflow-y: auto;
   flex: 1;
+  background: #1b1e26;
 }
 
 .form-grid {
@@ -286,7 +292,7 @@ const handleSubmit = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #2c1810;
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.95rem;
 }
@@ -301,12 +307,13 @@ const handleSubmit = () => {
 .form-group select {
   width: 100%;
   padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #3a3d45;
+  border-radius: 8px;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: #f9fafb;
+  background: #252831;
+  color: #ffffff;
 }
 
 .form-group input:focus,
@@ -314,9 +321,14 @@ const handleSubmit = () => {
 .form-group select:focus {
   outline: none;
   border-color: #c41e3a;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.1);
+  background: #2a2d35;
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
   transform: translateY(-1px);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #6b7280;
 }
 
 .form-group textarea {

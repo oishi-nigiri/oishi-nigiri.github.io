@@ -1,7 +1,7 @@
 <template>
   <div class="admin-tabs">
-    <button 
-      v-for="tab in visibleTabs" 
+    <button
+      v-for="tab in visibleTabs"
       :key="tab.id"
       :class="['tab-btn', { active: activeTab === tab.id }]"
       @click="$emit('tab-change', tab.id)"
@@ -13,46 +13,60 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed } from "vue";
+import { useAuth } from "@/composables/useAuth";
 
 const props = defineProps({
   activeTab: String,
-  permissions: Object
-})
+  permissions: Object,
+});
 
-defineEmits(['tab-change'])
+defineEmits(["tab-change"]);
+
+const { isSuperAdmin } = useAuth();
 
 const tabs = [
-  { id: 'import', label: 'Import', icon: 'fas fa-database', permission: null }, // Temporairement sans permission pour debug
-  { id: 'menu', label: 'Carte', icon: 'fas fa-utensils', permission: 'menu' },
-  { id: 'team', label: 'Équipe', icon: 'fas fa-users', permission: 'team' },
-  { id: 'sales', label: 'Ventes', icon: 'fas fa-money-bill-wave', permission: 'sales' },
-  { id: 'history', label: 'Historique', icon: 'fas fa-history', permission: 'history' },
-  { id: 'employees', label: 'Employés', icon: 'fas fa-user-tie', permission: 'employees' },
-  { id: 'ranks', label: 'Grades', icon: 'fas fa-star', permission: 'ranks' },
-  { id: 'admins', label: 'Admins', icon: 'fas fa-shield-alt', permission: 'admins' }
-]
-
-const isSuperAdmin = computed(() => localStorage.getItem('isSuperAdmin') === 'true')
+  { id: "menu", label: "Carte", icon: "fas fa-utensils", permission: "menu" },
+  { id: "team", label: "Équipe", icon: "fas fa-users", permission: "team" },
+  {
+    id: "sales",
+    label: "Ventes",
+    icon: "fas fa-money-bill-wave",
+    permission: "sales",
+  },
+  {
+    id: "history",
+    label: "Historique",
+    icon: "fas fa-history",
+    permission: "history",
+  },
+  {
+    id: "employees",
+    label: "Employés",
+    icon: "fas fa-user-tie",
+    permission: "employees",
+  },
+  { id: "ranks", label: "Grades", icon: "fas fa-star", permission: "ranks" },
+  {
+    id: "admins",
+    label: "Admins",
+    icon: "fas fa-shield-alt",
+    permission: "admins",
+  },
+  {
+    id: "login-tracking",
+    label: "Connexions",
+    icon: "fas fa-sign-in-alt",
+    permission: "admins",
+  },
+];
 
 const visibleTabs = computed(() => {
-  const filtered = tabs.filter(tab => {
-    if (isSuperAdmin.value) return true
-    if (!tab.permission) return true // Visible pour tous les admins si pas de permission spécifique
-    return props.permissions[tab.permission] === true
-  })
-
-  // Debug log
-  console.log('AdminTabs Debug:', {
-    isSuperAdmin: isSuperAdmin.value,
-    permissions: props.permissions,
-    totalTabs: tabs.length,
-    visibleTabs: filtered.length,
-    visibleTabIds: filtered.map(t => t.id)
-  })
-
-  return filtered
-})
+  return tabs.filter((tab) => {
+    if (isSuperAdmin.value) return true;
+    return props.permissions[tab.permission] === true;
+  });
+});
 </script>
 
 <style scoped>
@@ -76,7 +90,7 @@ const visibleTabs = computed(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   position: relative;
   margin-bottom: -3px;
   display: flex;
@@ -85,7 +99,7 @@ const visibleTabs = computed(() => {
 }
 
 .tab-btn::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -3px;
   left: 0;
@@ -118,4 +132,3 @@ const visibleTabs = computed(() => {
   font-size: 1rem;
 }
 </style>
-

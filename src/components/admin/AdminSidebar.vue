@@ -1,61 +1,117 @@
 <template>
-  <aside class="admin-sidebar" :class="{ 'mobile-open': mobileOpen, 'collapsed': collapsed && isMobile }">
+  <aside
+    class="admin-sidebar"
+    :class="{
+      'mobile-open': props.mobileOpen,
+      collapsed: collapsed && isMobile,
+    }"
+  >
     <div class="sidebar-header">
       <div class="logo-section">
-        <img src="/logo.png" alt="Oishi Nigiri" class="sidebar-logo" :class="{ 'hidden': collapsed && isMobile }">
-        <div class="logo-text" :class="{ 'hidden': collapsed && isMobile }">
+        <img
+          src="/logo.png"
+          alt="Oishi Nigiri"
+          class="sidebar-logo"
+          :class="{ hidden: collapsed && isMobile }"
+        />
+        <div class="logo-text" :class="{ hidden: collapsed && isMobile }">
           <span class="logo-kanji">美味しい</span>
           <span class="logo-title">Admin</span>
         </div>
       </div>
       <div class="header-actions">
-        <button class="mobile-close" @click="mobileOpen = false" v-if="mobileOpen">
+        <button
+          class="mobile-close"
+          @click="emit('close-mobile-menu')"
+          v-if="props.mobileOpen"
+        >
           <i class="fas fa-times"></i>
         </button>
-        <button class="collapse-btn" @click="toggleCollapse" :title="collapsed ? 'Afficher la sidebar' : 'Masquer la sidebar'" v-if="isMobile">
-          <i :class="collapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
+        <button
+          class="collapse-btn"
+          @click="toggleCollapse"
+          :title="
+            isMobile
+              ? 'Fermer la sidebar'
+              : collapsed
+              ? 'Afficher la sidebar'
+              : 'Masquer la sidebar'
+          "
+          v-if="isMobile"
+        >
+          <i
+            :class="collapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"
+          ></i>
         </button>
       </div>
     </div>
-    
+
     <nav class="sidebar-nav">
       <div v-if="managementTabs.length > 0" class="nav-section">
-        <div class="nav-section-title" :class="{ 'hidden': collapsed && isMobile }">Gestion</div>
+        <div
+          class="nav-section-title"
+          :class="{ hidden: collapsed && isMobile }"
+        >
+          Gestion
+        </div>
         <button
           v-for="tab in managementTabs"
           :key="tab.id"
-          :class="['nav-item', { active: activeTab === tab.id, 'collapsed': collapsed && isMobile }]"
+          :class="[
+            'nav-item',
+            { active: activeTab === tab.id, collapsed: collapsed && isMobile },
+          ]"
           @click="selectTab(tab.id)"
         >
           <i :class="tab.icon"></i>
-          <span :class="{ 'hidden': collapsed && isMobile }">{{ tab.label }}</span>
-          <span v-if="tab.badge && !(collapsed && isMobile)" class="nav-badge">{{ tab.badge }}</span>
+          <span :class="{ hidden: collapsed && isMobile }">{{
+            tab.label
+          }}</span>
+          <span
+            v-if="tab.badge && !(collapsed && isMobile)"
+            class="nav-badge"
+            >{{ tab.badge }}</span
+          >
         </button>
       </div>
-      
+
       <div v-if="configTabs.length > 0" class="nav-section">
-        <div class="nav-section-title" :class="{ 'hidden': collapsed && isMobile }">Configuration</div>
+        <div
+          class="nav-section-title"
+          :class="{ hidden: collapsed && isMobile }"
+        >
+          Configuration
+        </div>
         <button
           v-for="tab in configTabs"
           :key="tab.id"
-          :class="['nav-item', { active: activeTab === tab.id, 'collapsed': collapsed && isMobile }]"
+          :class="[
+            'nav-item',
+            { active: activeTab === tab.id, collapsed: collapsed && isMobile },
+          ]"
           @click="selectTab(tab.id)"
         >
           <i :class="tab.icon"></i>
-          <span :class="{ 'hidden': collapsed && isMobile }">{{ tab.label }}</span>
+          <span :class="{ hidden: collapsed && isMobile }">{{
+            tab.label
+          }}</span>
         </button>
       </div>
     </nav>
-    
-    <div class="sidebar-footer" :class="{ 'hidden': collapsed && isMobile }">
+
+    <div class="sidebar-footer" :class="{ hidden: collapsed && isMobile }">
       <div class="user-section">
         <div class="user-info-sidebar">
-          <img :src="avatarUrl" :alt="username" class="user-avatar-sidebar">
+          <img :src="avatarUrl" :alt="username" class="user-avatar-sidebar" />
           <div class="user-details-sidebar">
             <span class="username-sidebar">{{ username }}</span>
             <span class="user-role-sidebar">{{ userRole }}</span>
           </div>
         </div>
+        <button @click="toggleTheme" class="theme-toggle-btn" title="Basculer le thème">
+          <i :class="theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'"></i>
+          <span>{{ theme === 'dark' ? 'Mode clair' : 'Mode sombre' }}</span>
+        </button>
         <button @click="$emit('logout')" class="logout-btn-sidebar">
           <i class="fas fa-sign-out-alt"></i>
           Déconnexion
@@ -67,95 +123,167 @@
       </a>
     </div>
   </aside>
-  
+
   <!-- Mobile overlay -->
-  <div v-if="mobileOpen" class="mobile-overlay" @click="mobileOpen = false"></div>
+  <div
+    v-if="props.mobileOpen"
+    class="mobile-overlay"
+    @click="emit('close-mobile-menu')"
+  ></div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useAuth } from '../../composables/useAuth'
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { useAuth } from "../../composables/useAuth";
+import { useTheme } from "../../composables/useTheme";
 
-const { getAvatarUrl, getUsername } = useAuth()
+const { getAvatarUrl, getUsername, isSuperAdmin } = useAuth();
+const { theme, toggleTheme } = useTheme();
 
 const props = defineProps({
   activeTab: String,
   permissions: Object,
-  user: Object
-})
+  user: Object,
+  mobileOpen: Boolean,
+});
 
-const emit = defineEmits(['tab-change', 'logout'])
+const emit = defineEmits([
+  "tab-change",
+  "logout",
+  "close-mobile-menu",
+  "toggle-mobile-menu",
+]);
 
-const mobileOpen = ref(false)
-const collapsed = ref(false)
-const isMobile = ref(false)
+const collapsed = ref(false);
+const isMobile = ref(false);
 
 const tabs = [
-  { id: 'menu', label: 'Carte', icon: 'fas fa-utensils', permission: 'menu', category: 'management' },
-  { id: 'team', label: 'Équipe', icon: 'fas fa-users', permission: 'team', category: 'management' },
-  { id: 'sales', label: 'Ventes', icon: 'fas fa-chart-line', permission: 'sales', category: 'management' },
-  { id: 'history', label: 'Historique', icon: 'fas fa-history', permission: 'history', category: 'management' },
-  { id: 'employees', label: 'Employés', icon: 'fas fa-user-tie', permission: 'employees', category: 'config' },
-  { id: 'ranks', label: 'Grades', icon: 'fas fa-star', permission: 'ranks', category: 'config' },
-  { id: 'admins', label: 'Administrateurs', icon: 'fas fa-shield-alt', permission: 'admins', category: 'config' }
-]
-
-const isSuperAdmin = computed(() => localStorage.getItem('isSuperAdmin') === 'true')
+  {
+    id: "menu",
+    label: "Carte",
+    icon: "fas fa-utensils",
+    permission: "menu",
+    category: "management",
+  },
+  {
+    id: "reservations",
+    label: "Réservations",
+    icon: "fas fa-calendar-alt",
+    permission: "menu", // Reusing menu permission or adding a new one? Let's use menu for now.
+    category: "management",
+  },
+  {
+    id: "team",
+    label: "Équipe",
+    icon: "fas fa-users",
+    permission: "team",
+    category: "management",
+  },
+  {
+    id: "sales",
+    label: "Ventes",
+    icon: "fas fa-chart-line",
+    permission: "sales",
+    category: "management",
+  },
+  {
+    id: "history",
+    label: "Historique",
+    icon: "fas fa-history",
+    permission: "history",
+    category: "management",
+  },
+  {
+    id: "employees",
+    label: "Employés",
+    icon: "fas fa-user-tie",
+    permission: "employees",
+    category: "config",
+  },
+  {
+    id: "ranks",
+    label: "Grades",
+    icon: "fas fa-star",
+    permission: "ranks",
+    category: "config",
+  },
+  {
+    id: "admins",
+    label: "Administrateurs",
+    icon: "fas fa-shield-alt",
+    permission: "admins",
+    category: "config",
+  },
+  {
+    id: "login-tracking",
+    label: "Connexions",
+    icon: "fas fa-sign-in-alt",
+    permission: "admins",
+    category: "config",
+  },
+];
 
 const visibleTabs = computed(() => {
-  return tabs.filter(tab => {
-    if (isSuperAdmin.value) return true
-    return props.permissions[tab.permission] === true
-  })
-})
+  return tabs.filter((tab) => {
+    if (isSuperAdmin.value) return true;
+    return props.permissions[tab.permission] === true;
+  });
+});
 
 const managementTabs = computed(() => {
-  return visibleTabs.value.filter(tab => tab.category === 'management')
-})
+  return visibleTabs.value.filter((tab) => tab.category === "management");
+});
 
 const configTabs = computed(() => {
-  return visibleTabs.value.filter(tab => tab.category === 'config')
-})
+  return visibleTabs.value.filter((tab) => tab.category === "config");
+});
 
 const selectTab = (tabId) => {
-  emit('tab-change', tabId)
-  mobileOpen.value = false
-}
+  emit("tab-change", tabId);
+  emit("close-mobile-menu");
+};
 
 const toggleCollapse = () => {
   if (isMobile.value) {
-    collapsed.value = !collapsed.value
+    emit("toggle-mobile-menu");
+  } else {
+    collapsed.value = !collapsed.value;
   }
-}
+};
 
 // Gérer le responsive
 const handleResize = () => {
-  isMobile.value = window.innerWidth <= 768
+  isMobile.value = window.innerWidth <= 768;
   if (window.innerWidth <= 1024) {
-    mobileOpen.value = false
+    emit("close-mobile-menu");
   }
   // Sur desktop, forcer la sidebar à être déployée
   if (window.innerWidth > 768 && collapsed.value) {
-    collapsed.value = false
+    collapsed.value = false;
   }
-}
+};
 
 onMounted(() => {
-  handleResize() // Détecter le type d'appareil au démarrage
-  window.addEventListener('resize', handleResize)
-})
+  handleResize(); // Détecter le type d'appareil au démarrage
+  window.addEventListener("resize", handleResize);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-})
+  window.removeEventListener("resize", handleResize);
+});
 
-const username = computed(() => props.user ? getUsername(props.user) : 'Admin')
-const avatarUrl = computed(() => props.user ? getAvatarUrl(props.user) : 'https://cdn.discordapp.com/embed/avatars/0.png')
+const username = computed(() =>
+  props.user ? getUsername(props.user) : "Admin"
+);
+const avatarUrl = computed(() =>
+  props.user
+    ? getAvatarUrl(props.user)
+    : "https://cdn.discordapp.com/embed/avatars/0.png"
+);
 
 const userRole = computed(() => {
-  const isSuperAdmin = localStorage.getItem('isSuperAdmin') === 'true'
-  return isSuperAdmin ? 'Super Admin' : 'Administrateur'
-})
+  return isSuperAdmin.value ? "Super Admin" : "Administrateur";
+});
 </script>
 
 <style scoped>
@@ -165,8 +293,8 @@ const userRole = computed(() => {
   top: 0;
   width: 280px;
   height: 100vh;
-  background: linear-gradient(180deg, #1a1a1a 0%, #2c1810 100%);
-  color: white;
+  background: var(--bg-card);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -176,11 +304,9 @@ const userRole = computed(() => {
   transition: transform 0.3s ease, height 0.3s ease;
 }
 
-
-
 .sidebar-header {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -228,7 +354,7 @@ const userRole = computed(() => {
   display: none;
   background: transparent;
   border: none;
-  color: white;
+  color: var(--text-primary);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -244,7 +370,7 @@ const userRole = computed(() => {
   display: none;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--text-primary);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -259,7 +385,7 @@ const userRole = computed(() => {
 
 .collapse-btn:hover {
   background: rgba(196, 30, 58, 0.3);
-  border-color: #c41e3a;
+  border-color: var(--accent-red);
   transform: scale(1.05);
 }
 
@@ -268,7 +394,6 @@ const userRole = computed(() => {
     display: flex;
   }
 }
-
 
 .sidebar-nav {
   flex: 1;
@@ -286,7 +411,7 @@ const userRole = computed(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
@@ -298,31 +423,31 @@ const userRole = computed(() => {
   padding: 0.875rem 1.5rem;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
   position: relative;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .nav-item::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
   width: 4px;
-  background: #c41e3a;
+  background: var(--accent-red);
   transform: scaleY(0);
   transition: transform 0.3s ease;
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  background: var(--bg-hover);
+  color: var(--text-primary);
   padding-left: 2rem;
 }
 
@@ -331,8 +456,8 @@ const userRole = computed(() => {
 }
 
 .nav-item.active {
-  background: rgba(196, 30, 58, 0.15);
-  color: white;
+  background: rgba(225, 29, 46, 0.1);
+  color: var(--accent-red);
   font-weight: 600;
 }
 
@@ -367,8 +492,6 @@ const userRole = computed(() => {
   visibility: hidden;
 }
 
-
-
 .nav-item i {
   width: 20px;
   font-size: 1.1rem;
@@ -381,7 +504,7 @@ const userRole = computed(() => {
 }
 
 .nav-badge {
-  background: #c41e3a;
+  background: var(--accent-red);
   color: white;
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
@@ -393,7 +516,7 @@ const userRole = computed(() => {
 
 .sidebar-footer {
   padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -402,9 +525,9 @@ const userRole = computed(() => {
 .user-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .user-info-sidebar {
@@ -417,7 +540,7 @@ const userRole = computed(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px solid #c41e3a;
+  border: 2px solid var(--accent-red);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
 }
@@ -436,12 +559,40 @@ const userRole = computed(() => {
 .username-sidebar {
   font-weight: 600;
   font-size: 0.95rem;
-  color: white;
+  color: var(--text-primary);
 }
 
 .user-role-sidebar {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--theme-toggle-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--theme-toggle-border);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Noto Sans JP", sans-serif;
+  width: 100%;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--theme-toggle-bg-hover);
+  border-color: var(--accent-red);
+  transform: translateY(-1px);
+}
+
+.theme-toggle-btn i {
+  font-size: 0.9rem;
 }
 
 .logout-btn-sidebar {
@@ -459,7 +610,7 @@ const userRole = computed(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   width: 100%;
 }
 
@@ -479,7 +630,7 @@ const userRole = computed(() => {
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   background: rgba(196, 30, 58, 0.2);
-  color: white;
+  color: var(--text-primary);
   text-decoration: none;
   border-radius: 10px;
   font-size: 0.9rem;
@@ -515,15 +666,15 @@ const userRole = computed(() => {
     transition: transform 0.3s ease;
     width: 280px;
   }
-  
+
   .admin-sidebar.mobile-open {
     transform: translateX(0);
   }
-  
+
   .mobile-close {
     display: block;
   }
-  
+
   .mobile-overlay {
     display: block;
   }
@@ -688,4 +839,3 @@ const userRole = computed(() => {
   }
 }
 </style>
-

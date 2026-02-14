@@ -106,12 +106,13 @@ const handleCancel = () => {
 }
 
 .confirm-container {
-  background: white;
+  background: #1b1e26;
   border-radius: 20px;
   width: 100%;
   max-width: 450px;
   padding: 2.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid #2a2d35;
   animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
   transform: translateZ(0);
@@ -188,14 +189,14 @@ const handleCancel = () => {
 .confirm-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #2c1810;
+  color: #ffffff;
   margin: 0 0 1rem 0;
   letter-spacing: -0.5px;
 }
 
 .confirm-message {
   font-size: 1rem;
-  color: #6c757d;
+  color: #a0a0a8;
   line-height: 1.6;
   margin: 0 0 2rem 0;
 }
@@ -209,7 +210,7 @@ const handleCancel = () => {
 .btn {
   padding: 0.75rem 1.75rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
@@ -218,20 +219,20 @@ const handleCancel = () => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   min-width: 120px;
   justify-content: center;
 }
 
 .btn-cancel {
-  background: white;
-  color: #6c757d;
-  border: 2px solid #e5e7eb;
+  background: #252831;
+  color: #ffffff;
+  border: 1px solid #3a3d45;
 }
 
 .btn-cancel:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: #2a2d35;
+  border-color: #3a3d45;
 }
 
 .btn-confirm {
@@ -239,30 +240,30 @@ const handleCancel = () => {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #c41e3a 0%, #9a1629 100%);
+  background: #c41e3a;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #9a1629 0%, #c41e3a 100%);
+  background: #a01a2e;
   box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: #dc2626;
 }
 
 .btn-danger:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  background: #b91c1c;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #16a34a;
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background: #15803d;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
 
 @media (max-width: 768px) {

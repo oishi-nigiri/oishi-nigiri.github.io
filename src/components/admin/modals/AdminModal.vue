@@ -8,49 +8,66 @@
               <i class="fas fa-shield-alt"></i>
             </div>
             <div>
-              <h2>{{ admin ? 'Modifier un Administrateur' : 'Ajouter un Administrateur' }}</h2>
-              <p class="modal-subtitle">{{ admin ? 'Modifiez les permissions de l\'administrateur' : 'Ajoutez un nouvel administrateur avec des permissions personnalisées' }}</p>
+              <h2>
+                {{
+                  admin
+                    ? "Modifier un Administrateur"
+                    : "Ajouter un Administrateur"
+                }}
+              </h2>
+              <p class="modal-subtitle">
+                {{
+                  admin
+                    ? "Modifiez les permissions de l'administrateur"
+                    : "Ajoutez un nouvel administrateur avec des permissions personnalisées"
+                }}
+              </p>
             </div>
           </div>
-          <button class="modal-close" @click="$emit('close')" aria-label="Fermer">
+          <button
+            class="modal-close"
+            @click="$emit('close')"
+            aria-label="Fermer"
+          >
             <i class="fas fa-times"></i>
           </button>
         </div>
-        
+
         <form @submit.prevent="handleSubmit" class="modal-body">
           <div class="form-group">
-            <label for="admin-discord-id">
-              <i class="fab fa-discord"></i>
-              Discord ID *
+            <label for="admin-email">
+              <i class="fas fa-envelope"></i>
+              Email *
             </label>
-            <input 
-              type="text" 
-              id="admin-discord-id" 
-              v-model="formData.discordId" 
-              required 
-              placeholder="Ex: 123456789012345678"
+            <input
+              type="email"
+              id="admin-email"
+              v-model="formData.email"
+              required
+              placeholder="Ex: admin@example.com"
               autocomplete="off"
-            >
+            />
             <small class="form-hint">
               <i class="fas fa-info-circle"></i>
-              L'ID Discord de l'utilisateur (visible dans le mode développeur Discord)
+              L'adresse email de l'utilisateur (doit correspondre à son compte
+              Firebase)
             </small>
           </div>
-          
+
           <div class="form-group">
             <label for="admin-username">
               <i class="fas fa-user"></i>
               Nom d'utilisateur (optionnel)
             </label>
-            <input 
-              type="text" 
-              id="admin-username" 
-              v-model="formData.username" 
+            <input
+              type="text"
+              id="admin-username"
+              v-model="formData.username"
               placeholder="Ex: JohnDoe#1234"
               autocomplete="off"
-            >
+            />
           </div>
-          
+
           <div class="form-group">
             <label class="permissions-label">
               <i class="fas fa-key"></i>
@@ -58,63 +75,69 @@
             </label>
             <div class="permissions-grid">
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.menu">
+                <input type="checkbox" v-model="formData.permissions.menu" />
                 <div class="permission-content">
                   <i class="fas fa-utensils"></i>
                   <span>Carte</span>
                 </div>
               </label>
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.team">
+                <input type="checkbox" v-model="formData.permissions.team" />
                 <div class="permission-content">
                   <i class="fas fa-users"></i>
                   <span>Équipe</span>
                 </div>
               </label>
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.sales">
+                <input type="checkbox" v-model="formData.permissions.sales" />
                 <div class="permission-content">
                   <i class="fas fa-chart-line"></i>
                   <span>Ventes</span>
                 </div>
               </label>
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.history">
+                <input type="checkbox" v-model="formData.permissions.history" />
                 <div class="permission-content">
                   <i class="fas fa-history"></i>
                   <span>Historique</span>
                 </div>
               </label>
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.resetSales">
+                <input
+                  type="checkbox"
+                  v-model="formData.permissions.resetSales"
+                />
                 <div class="permission-content">
                   <i class="fas fa-redo"></i>
                   <span>Réinit. Ventes</span>
                 </div>
               </label>
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.bonuses">
+                <input type="checkbox" v-model="formData.permissions.bonuses" />
                 <div class="permission-content">
                   <i class="fas fa-gift"></i>
                   <span>Primes</span>
                 </div>
               </label>
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.employees">
+                <input
+                  type="checkbox"
+                  v-model="formData.permissions.employees"
+                />
                 <div class="permission-content">
                   <i class="fas fa-user-tie"></i>
                   <span>Employés</span>
                 </div>
               </label>
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.ranks">
+                <input type="checkbox" v-model="formData.permissions.ranks" />
                 <div class="permission-content">
                   <i class="fas fa-star"></i>
                   <span>Grades</span>
                 </div>
               </label>
               <label class="permission-item">
-                <input type="checkbox" v-model="formData.permissions.admins">
+                <input type="checkbox" v-model="formData.permissions.admins" />
                 <div class="permission-content">
                   <i class="fas fa-shield-alt"></i>
                   <span>Administrateurs</span>
@@ -122,15 +145,19 @@
               </label>
             </div>
           </div>
-          
+
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="$emit('close')">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="$emit('close')"
+            >
               <i class="fas fa-times"></i>
               Annuler
             </button>
             <button type="submit" class="btn btn-primary">
               <i class="fas fa-check"></i>
-              {{ admin ? 'Modifier' : 'Ajouter' }}
+              {{ admin ? "Modifier" : "Ajouter" }}
             </button>
           </div>
         </form>
@@ -140,17 +167,18 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch } from "vue";
 
 const props = defineProps({
-  admin: Object
-})
+  admin: Object,
+  initialData: Object,
+});
 
-const emit = defineEmits(['close', 'save'])
+const emit = defineEmits(["close", "save"]);
 
 const formData = ref({
-  discordId: '',
-  username: '',
+  email: "",
+  username: "",
   permissions: {
     menu: true,
     team: true,
@@ -160,39 +188,47 @@ const formData = ref({
     bonuses: false,
     employees: true,
     ranks: true,
-    admins: false
-  }
-})
+    admins: false,
+  },
+});
 
-watch(() => props.admin, (newAdmin) => {
-  if (newAdmin) {
-    formData.value = {
-      discordId: newAdmin.discordId || '',
-      username: newAdmin.username || '',
-      permissions: { ...formData.value.permissions, ...(newAdmin.permissions || {}) }
+watch(
+  () => props.admin,
+  (newAdmin) => {
+    if (newAdmin) {
+      formData.value = {
+        email: newAdmin.email || "",
+        username: newAdmin.username || "",
+        permissions: {
+          ...formData.value.permissions,
+          ...(newAdmin.permissions || {}),
+        },
+      };
+    } else {
+      formData.value = {
+        email: props.initialData?.email || "",
+        username: props.initialData?.username || "",
+        permissions: {
+          menu: true,
+          team: true,
+          sales: true,
+          history: false,
+          resetSales: false,
+          bonuses: false,
+          employees: true,
+          ranks: true,
+          admins: false,
+          ...(props.initialData?.permissions || {}),
+        },
+      };
     }
-  } else {
-    formData.value = {
-      discordId: '',
-      username: '',
-      permissions: {
-        menu: true,
-        team: true,
-        sales: true,
-        history: false,
-        resetSales: false,
-        bonuses: false,
-        employees: true,
-        ranks: true,
-        admins: false
-      }
-    }
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+);
 
 const handleSubmit = () => {
-  emit('save', formData.value)
-}
+  emit("save", formData.value);
+};
 </script>
 
 <style scoped>
@@ -213,19 +249,24 @@ const handleSubmit = () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-container {
-  background: white;
+  background: #1b1e26;
   border-radius: 20px;
   width: 100%;
   max-width: 650px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid #2a2d35;
   animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   will-change: transform, opacity;
@@ -245,12 +286,13 @@ const handleSubmit = () => {
 
 .modal-header {
   padding: 2rem;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: #252831;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1.5rem;
+  border-bottom: 1px solid #2a2d35;
 }
 
 .modal-header-content {
@@ -262,13 +304,14 @@ const handleSubmit = () => {
 .modal-icon {
   width: 56px;
   height: 56px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #c41e3a;
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   flex-shrink: 0;
+  color: white;
 }
 
 .modal-header h2 {
@@ -285,9 +328,9 @@ const handleSubmit = () => {
 }
 
 .modal-close {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
+  background: #2a2d35;
+  border: 1px solid #3a3d45;
+  color: #ffffff;
   width: 40px;
   height: 40px;
   border-radius: 10px;
@@ -301,7 +344,9 @@ const handleSubmit = () => {
 }
 
 .modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #3a3d45;
+  border-color: #c41e3a;
+  color: #c41e3a;
   transform: rotate(90deg);
 }
 
@@ -309,6 +354,7 @@ const handleSubmit = () => {
   padding: 2rem;
   overflow-y: auto;
   flex: 1;
+  background: #1b1e26;
 }
 
 .form-group {
@@ -326,49 +372,55 @@ const handleSubmit = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #2c1810;
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.95rem;
 }
 
 .form-group label i {
-  color: #28a745;
+  color: #c41e3a;
   font-size: 0.9rem;
 }
 
 .form-group input {
   width: 100%;
   padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-family: 'Noto Sans JP', sans-serif;
+  border: 1px solid #3a3d45;
+  border-radius: 8px;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: #f9fafb;
+  background: #252831;
+  color: #ffffff;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #28a745;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+  border-color: #c41e3a;
+  background: #2a2d35;
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
   transform: translateY(-1px);
+}
+
+.form-group input::placeholder {
+  color: #6b7280;
 }
 
 .form-hint {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #6c757d;
+  color: #a0a0a8;
   font-size: 0.85rem;
   margin-top: 0.25rem;
   padding: 0.5rem;
-  background: #f3f4f6;
+  background: #252831;
   border-radius: 8px;
+  border: 1px solid #2a2d35;
 }
 
 .form-hint i {
-  color: #28a745;
+  color: #c41e3a;
   font-size: 0.8rem;
 }
 
@@ -381,9 +433,9 @@ const handleSubmit = () => {
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   padding: 1.25rem;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 2px solid #e5e7eb;
+  background: #252831;
+  border-radius: 8px;
+  border: 1px solid #2a2d35;
 }
 
 .permission-item {
@@ -391,18 +443,18 @@ const handleSubmit = () => {
   align-items: center;
   cursor: pointer;
   padding: 0.875rem;
-  border-radius: 10px;
+  border-radius: 8px;
   transition: all 0.3s ease;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: #1b1e26;
+  border: 1px solid #3a3d45;
   position: relative;
 }
 
 .permission-item:hover {
-  border-color: #28a745;
-  background: #f0fdf4;
+  border-color: #c41e3a;
+  background: #252831;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);
+  box-shadow: 0 4px 12px rgba(196, 30, 58, 0.2);
 }
 
 .permission-item input[type="checkbox"] {
@@ -418,25 +470,25 @@ const handleSubmit = () => {
   gap: 0.75rem;
   width: 100%;
   font-weight: 500;
-  color: #2c1810;
+  color: #ffffff;
 }
 
 .permission-content i {
-  color: #28a745;
+  color: #c41e3a;
   font-size: 1.1rem;
   width: 20px;
   text-align: center;
 }
 
 .permission-item input[type="checkbox"]:checked + .permission-content {
-  color: #28a745;
+  color: #c41e3a;
   font-weight: 600;
 }
 
 .permission-item input[type="checkbox"]:checked ~ .permission-content,
 .permission-item:has(input[type="checkbox"]:checked) {
-  border-color: #28a745;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #c41e3a;
+  background: #252831;
 }
 
 .modal-footer {
@@ -444,45 +496,46 @@ const handleSubmit = () => {
   gap: 1rem;
   justify-content: flex-end;
   padding-top: 1.5rem;
-  border-top: 2px solid #f3f4f6;
+  border-top: 1px solid #2a2d35;
   margin-top: 1.5rem;
+  background: #1b1e26;
 }
 
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: #c41e3a;
   color: white;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+  background: #a01a2e;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 6px 16px rgba(196, 30, 58, 0.4);
 }
 
 .btn-secondary {
-  background: white;
-  color: #6c757d;
-  border: 2px solid #e5e7eb;
+  background: #252831;
+  color: #ffffff;
+  border: 1px solid #3a3d45;
 }
 
 .btn-secondary:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: #2a2d35;
+  border-color: #3a3d45;
   transform: translateY(-2px);
 }
 
@@ -490,20 +543,20 @@ const handleSubmit = () => {
   .permissions-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .modal-header {
     padding: 1.5rem;
   }
-  
+
   .modal-body {
     padding: 1.5rem;
   }
-  
+
   .modal-header-content {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .modal-icon {
     width: 48px;
     height: 48px;

@@ -7,7 +7,10 @@
         <span class="hero-name">Oishi Nigiri</span>
       </h1>
       <p class="hero-subtitle">Une expérience culinaire authentique du Japon</p>
-      <a href="#/" @click.prevent="scrollToMenu" class="cta-button">Découvrir le Menu</a>
+      <div class="hero-btns">
+        <a href="#/" @click.prevent="scrollToMenu" class="cta-button">Découvrir le Menu</a>
+        <a href="#/" @click.prevent="scrollToReservation" class="cta-button highlighted">Réservation</a>
+      </div>
     </div>
   </section>
 </template>
@@ -17,6 +20,17 @@ import { onMounted } from 'vue'
 
 const scrollToMenu = () => {
   const element = document.getElementById('carte-semaine')
+  if (element) {
+    const offsetTop = element.offsetTop - 80
+    window.scrollTo({
+      top: offsetTop,
+      behavior: 'smooth'
+    })
+  }
+}
+
+const scrollToReservation = () => {
+  const element = document.getElementById('reservation')
   if (element) {
     const offsetTop = element.offsetTop - 80
     window.scrollTo({
@@ -41,37 +55,43 @@ onMounted(() => {
 <style scoped>
 .hero {
   height: 100vh;
-  background: linear-gradient(rgba(26, 26, 26, 0.6), rgba(26, 26, 26, 0.6)),
-              url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect fill="%232c1810" width="1200" height="800"/><path fill="%239a1629" d="M0 0 L1200 0 L1200 400 Q600 500 0 400 Z" opacity="0.3"/></svg>');
-  background-size: cover;
-  background-position: center;
+  min-height: 600px;
+  background: #0f0f0f;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   text-align: center;
-  color: #fff8f0;
+  color: #fff;
+  overflow: hidden;
 }
 
-.hero-overlay {
+.hero::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at center, transparent 0%, rgba(26, 26, 26, 0.8) 100%);
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(232, 90, 79, 0.08) 0%, transparent 50%);
+}
+
+.hero-overlay {
+  display: none;
 }
 
 .hero-content {
   position: relative;
   z-index: 2;
-  animation: fadeInUp 1s ease;
+  animation: fadeIn 1s ease;
+  padding: 2rem;
+  max-width: 800px;
 }
 
 .hero-title {
   font-family: 'Playfair Display', serif;
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -79,43 +99,71 @@ onMounted(() => {
 
 .hero-kanji {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 3rem;
-  color: #c41e3a;
+  font-size: 1.2rem;
+  color: #e85a4f;
+  font-weight: 400;
+  letter-spacing: 8px;
+  text-transform: uppercase;
 }
 
 .hero-name {
   font-size: 4rem;
-  letter-spacing: 5px;
+  font-weight: 400;
+  letter-spacing: 12px;
+  text-transform: uppercase;
+  color: #fff;
 }
 
 .hero-subtitle {
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
+  font-size: 1rem;
+  margin-bottom: 3rem;
   font-weight: 300;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
 }
 
 .cta-button {
   display: inline-block;
-  padding: 1rem 3rem;
-  background: #c41e3a;
-  color: #fff8f0;
+  padding: 1rem 2.5rem;
+  background: transparent;
+  color: #fff;
   text-decoration: none;
-  border-radius: 50px;
-  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 400;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .cta-button:hover {
-  background: #9a1629;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
 }
 
-@keyframes fadeInUp {
+.cta-button.highlighted {
+  background: #e85a4f;
+  border-color: #e85a4f;
+}
+
+.cta-button.highlighted:hover {
+  background: #f06c62;
+  border-color: #f06c62;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(232, 90, 79, 0.2);
+}
+
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -125,66 +173,48 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .hero {
-    padding: 0 1rem;
+    padding: 0 1.5rem;
+    min-height: 500px;
   }
 
   .hero-content {
-    padding: 0 1rem;
-  }
-
-  .hero-title {
-    font-size: 2.5rem;
+    padding: 1rem;
   }
 
   .hero-kanji {
-    font-size: 2rem;
+    font-size: 0.9rem;
+    letter-spacing: 4px;
   }
 
   .hero-name {
     font-size: 2.5rem;
-    letter-spacing: 3px;
+    letter-spacing: 6px;
   }
 
   .hero-subtitle {
-    font-size: 1.2rem;
-    padding: 0 1rem;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
   }
 
   .cta-button {
-    padding: 0.9rem 2.5rem;
-    font-size: 1rem;
+    padding: 0.85rem 2rem;
+    font-size: 0.75rem;
   }
 }
 
 @media (max-width: 480px) {
-  .hero {
-    height: 100vh;
-    min-height: 600px;
-  }
-
-  .hero-title {
-    font-size: 1.75rem;
-  }
-
   .hero-kanji {
-    font-size: 1.5rem;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
   }
 
   .hero-name {
-    font-size: 1.75rem;
-    letter-spacing: 2px;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
   }
 
   .hero-subtitle {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .cta-button {
-    padding: 0.8rem 2rem;
-    font-size: 0.9rem;
-    width: auto;
-    max-width: 90%;
+    font-size: 0.8rem;
   }
 }
 </style>

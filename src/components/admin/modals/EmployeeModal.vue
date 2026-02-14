@@ -45,36 +45,36 @@
           </div>
           
           <div class="form-group">
-            <label for="employee-discord-id">
-              <i class="fab fa-discord"></i>
-              Discord ID (optionnel)
+            <label for="employee-email">
+              <i class="fas fa-envelope"></i>
+              Email (optionnel)
             </label>
-            <div class="discord-id-selector">
-              <select 
-                id="employee-discord-id-select" 
-                v-model="selectedAdminId"
+            <div class="email-selector">
+              <select
+                id="employee-email-select"
+                v-model="selectedAdminEmail"
                 @change="onAdminSelect"
-                class="discord-select"
+                class="email-select"
               >
                 <option value="">Sélectionner un administrateur</option>
-                <option v-for="admin in admins" :key="admin.id" :value="admin.discordId">
-                  {{ admin.username || admin.discordId || 'Admin' }} ({{ admin.discordId }})
+                <option v-for="admin in admins" :key="admin.id" :value="admin.email">
+                  {{ admin.username || admin.email || 'Admin' }} ({{ admin.email }})
                 </option>
                 <option value="manual">Saisir manuellement</option>
               </select>
-              <input 
+              <input
                 v-if="showManualInput"
-                type="text" 
-                id="employee-discord-id" 
-                v-model="formData.discordId" 
-                placeholder="Ex: 123456789012345678"
+                type="email"
+                id="employee-email"
+                v-model="formData.email"
+                placeholder="Ex: employe@restaurant.com"
                 autocomplete="off"
-                class="discord-input"
+                class="email-input"
               >
             </div>
             <small class="form-hint">
               <i class="fas fa-info-circle"></i>
-              Choisissez un administrateur ou saisissez l'ID Discord pour que l'employé puisse supprimer ses propres ventes
+              Choisissez un administrateur ou saisissez l'email pour que l'employé puisse supprimer ses propres ventes
             </small>
           </div>
           
@@ -111,10 +111,10 @@ const emit = defineEmits(['close', 'save'])
 const formData = ref({
   name: '',
   rankId: '',
-  discordId: ''
+  email: ''
 })
 
-const selectedAdminId = ref('')
+const selectedAdminEmail = ref('')
 const showManualInput = ref(false)
 
 watch(() => props.employee, (newEmployee) => {
@@ -122,42 +122,42 @@ watch(() => props.employee, (newEmployee) => {
     formData.value = {
       name: newEmployee.name || '',
       rankId: newEmployee.rankId || '',
-      discordId: newEmployee.discordId || ''
+      email: newEmployee.email || ''
     }
-    // Si l'employé a un discordId, chercher s'il correspond à un admin
-    if (newEmployee.discordId) {
-      const matchingAdmin = props.admins.find(a => a.discordId === newEmployee.discordId)
+    // Si l'employé a un email, chercher s'il correspond à un admin
+    if (newEmployee.email) {
+      const matchingAdmin = props.admins.find(a => a.email === newEmployee.email)
       if (matchingAdmin) {
-        selectedAdminId.value = matchingAdmin.discordId
+        selectedAdminEmail.value = matchingAdmin.email
         showManualInput.value = false
       } else {
-        selectedAdminId.value = 'manual'
+        selectedAdminEmail.value = 'manual'
         showManualInput.value = true
       }
     } else {
-      selectedAdminId.value = ''
+      selectedAdminEmail.value = ''
       showManualInput.value = false
     }
   } else {
     formData.value = {
       name: '',
       rankId: '',
-      discordId: ''
+      email: ''
     }
-    selectedAdminId.value = ''
+    selectedAdminEmail.value = ''
     showManualInput.value = false
   }
 }, { immediate: true })
 
 const onAdminSelect = () => {
-  if (selectedAdminId.value === 'manual') {
+  if (selectedAdminEmail.value === 'manual') {
     showManualInput.value = true
-    formData.value.discordId = ''
-  } else if (selectedAdminId.value) {
-    formData.value.discordId = selectedAdminId.value
+    formData.value.email = ''
+  } else if (selectedAdminEmail.value) {
+    formData.value.email = selectedAdminEmail.value
     showManualInput.value = false
   } else {
-    formData.value.discordId = ''
+    formData.value.email = ''
     showManualInput.value = false
   }
 }
@@ -190,14 +190,15 @@ const handleSubmit = () => {
 }
 
 .modal-container {
-  background: white;
+  background: #1b1e26;
   border-radius: 20px;
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid #2a2d35;
   animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   will-change: transform, opacity;
@@ -217,12 +218,13 @@ const handleSubmit = () => {
 
 .modal-header {
   padding: 2rem;
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  background: #252831;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1.5rem;
+  border-bottom: 1px solid #2a2d35;
 }
 
 .modal-header-content {
@@ -234,13 +236,14 @@ const handleSubmit = () => {
 .modal-icon {
   width: 56px;
   height: 56px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #c41e3a;
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   flex-shrink: 0;
+  color: white;
 }
 
 .modal-header h2 {
@@ -257,9 +260,9 @@ const handleSubmit = () => {
 }
 
 .modal-close {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
+  background: #2a2d35;
+  border: 1px solid #3a3d45;
+  color: #ffffff;
   width: 40px;
   height: 40px;
   border-radius: 10px;
@@ -273,7 +276,9 @@ const handleSubmit = () => {
 }
 
 .modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #3a3d45;
+  border-color: #c41e3a;
+  color: #c41e3a;
   transform: rotate(90deg);
 }
 
@@ -281,6 +286,7 @@ const handleSubmit = () => {
   padding: 2rem;
   overflow-y: auto;
   flex: 1;
+  background: #1b1e26;
 }
 
 .form-group {
@@ -298,13 +304,13 @@ const handleSubmit = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #2c1810;
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.95rem;
 }
 
 .form-group label i {
-  color: #17a2b8;
+  color: #c41e3a;
   font-size: 0.9rem;
 }
 
@@ -312,34 +318,39 @@ const handleSubmit = () => {
 .form-group select {
   width: 100%;
   padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid #3a3d45;
+  border-radius: 8px;
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: #f9fafb;
+  background: #252831;
+  color: #ffffff;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #17a2b8;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(23, 162, 184, 0.1);
+  border-color: #c41e3a;
+  background: #2a2d35;
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
   transform: translateY(-1px);
 }
 
-.discord-id-selector {
+.form-group input::placeholder {
+  color: #6b7280;
+}
+
+.email-selector {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.discord-select {
+.email-select {
   width: 100%;
 }
 
-.discord-input {
+.email-input {
   width: 100%;
   margin-top: 0;
 }
@@ -349,12 +360,12 @@ const handleSubmit = () => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: #6c757d;
+  color: #a0a0a8;
   margin-top: 0.25rem;
 }
 
 .form-hint i {
-  color: #17a2b8;
+  color: #c41e3a;
   font-size: 0.8rem;
 }
 
@@ -363,14 +374,15 @@ const handleSubmit = () => {
   gap: 1rem;
   justify-content: flex-end;
   padding-top: 1.5rem;
-  border-top: 2px solid #f3f4f6;
+  border-top: 1px solid #2a2d35;
   margin-top: 1.5rem;
+  background: #1b1e26;
 }
 
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
@@ -379,29 +391,29 @@ const handleSubmit = () => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  background: #c41e3a;
   color: white;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #138496 0%, #17a2b8 100%);
+  background: #a01a2e;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(23, 162, 184, 0.4);
+  box-shadow: 0 6px 16px rgba(196, 30, 58, 0.4);
 }
 
 .btn-secondary {
-  background: white;
-  color: #6c757d;
-  border: 2px solid #e5e7eb;
+  background: #252831;
+  color: #ffffff;
+  border: 1px solid #3a3d45;
 }
 
 .btn-secondary:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: #2a2d35;
+  border-color: #3a3d45;
   transform: translateY(-2px);
 }
 
